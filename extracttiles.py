@@ -3,7 +3,7 @@ import os
 import glob
 import pprint
 
-path = 'G:\\Program Files (x86)\\Steam\\steamapps\\common\\TaleSpire\\TaleSpire_Data\\Taleweaver\\boardAssets\\Tiles'
+path = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\TaleSpire\\Taleweaver\\boardAssets\\Tiles' #insert path here!
 
 output = {}
 
@@ -36,5 +36,5 @@ for root,d_names,f_names in os.walk(path):
             if depth == 0:
                 depth = asset["assetLoaders"][0]["occluderInfo"]["Depth"]
             output[nguid] = {"name": asset_name, "group": board_asset_group, "width": width, "height": height, "depth": depth}
-with open("assetdata.js", "w") as fout:
+with open("scripts/assetdata.js", "w") as fout:
     fout.write("asset_data = " + json.dumps(output) + ";")

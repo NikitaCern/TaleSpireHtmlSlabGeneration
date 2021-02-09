@@ -1,517 +1,18 @@
 <html>
 <head>
-    <title>Forest Generator v1.8</title>
+    <title>Terrain Generator</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAiPFoAAAAAAES7lQBDwJIAP8CVADzAkAA/v5kAQr+RAB48WwBEv5EAN8GSACA8WwA7wJMAV7yeAEyzlwBGvpUASb+ZAD6/kgAhO10AP76WADHCjQCT1sQAPcGTAEvDnQAkPVsAMUVeAEm7lwA4wZEAPMCSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQsYCwEBAQEBAQEBAQEBAQEBEgEBAQEBAQEBAQEBAQEBAQsBAQEBAQEBAQEBAQEBAQEZAQEBAQEBAQEBAQEXHBwBAAEcHAEBAQEBAQEJHBwcFAsVHBwcFgEBAQERHBwcHBwIHBwMHBwcAQEBDBwcHBMcHBwCHBwcBgEBAQQKHAUcHBwOHBwcEAEBAQEBGxwcHBwcGhwcHBwBAQEBARwNHBwcDxwcHBwBAQEBAQEcHBwcHBwcHBwHAQEBAQEBARwcHBwcHBwcAQEBAQEBAQEBHBwcHBwcAQEBAQEBAQEBAQEBHBwDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf4/AAD/fwAA/38AAP9/AADxTwAA4AMAAMABAADAAQAAwAMAAOADAADgBwAA4AcAAPAPAAD4HwAA/j8AAP//AAA=" rel="icon" type="image/x-icon" />
-    <!-- Local asset data -->    
-    <script src="talespireslabs.js"></script>
-    <script src="assetdata.js"></script>
+    <link rel="stylesheet" href="styles/master.css">
 
-    <style>
-        body {
-            font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-            margin: 0px;
-            padding: 0px;
-        }
-        *, *:before, *:after {
-          box-sizing: border-box;
-        }
+    <!-- Local asset data -->
+    <script src="scripts/talespireslabs.js"></script>
+    <script src="scripts/assetdata.js"></script>
+    <script src="presets/customs.js"></script>
+    <script src="presets/presets.js"></script>
 
-        .footer {
-          float: left;
-          left: 0;
-          bottom: 0;
-          width: 100%;
-          background-color: #DDD;
-          color: #333;
-          text-align: center;
-          padding: 20px;
-        }
-        input:active { 
-            outline:none;
-        }
-        input[type=number] {
-            padding:10px;
-            border:1;
-            box-shadow:0 0 15px 4px rgba(0,0,0,0.06);
-            margin-top:10px;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            border-radius:10px;
-            width: 100px;
-        }        
-        .btn-group button {
-          outline:none;
-          background-color: #4CAF50; /* Green background */
-          border: 1px solid green; /* Green border */
-          color: white; /* White text */
-          padding: 10px 24px; /* Some padding */
-          margin-top: 10px;
-          margin-right: 22px;
-          cursor: pointer; /* Pointer/hand icon */
-          float: left; /* Float the buttons side by side */
-        }
-
-        .btn-group button:not(:last-child) {
-          border-right: none; /* Prevent double borders */
-        }
-
-        /* Clear floats (clearfix hack) */
-        .btn-group:after {
-          content: "";
-          clear: both;
-          display: table;
-        }
-
-        /* Add a background color on hover */
-        .btn-group button:hover {
-          background-color: #5edb62;
-          color: #333;
-        }
-        textarea {
-            background: #f4f4f4;
-            border: 1px solid #ddd;
-            border-left: 3px solid #f36d33;
-            color: #666;
-            page-break-inside: avoid;
-            font-family: monospace;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 1.6em;
-            max-width: 100%;
-            overflow: auto;
-            padding: 1em 1.5em;
-            display: block;
-            word-wrap: break-word;
-        }
-        /* The snackbar - position it at the bottom and in the middle of the screen */
-        #snackbar {
-          visibility: hidden; /* Hidden by default. Visible on click */
-          min-width: 250px; /* Set a default minimum width */
-          margin-left: -125px; /* Divide value of min-width by 2 */
-          background-color: #333; /* Black background color */
-          color: #fff; /* White text color */
-          text-align: center; /* Centered text */
-          border-radius: 2px; /* Rounded borders */
-          padding: 16px; /* Padding */
-          position: fixed; /* Sit on top of the screen */
-          z-index: 1; /* Add a z-index if needed */
-          left: 50%; /* Center the snackbar */
-          bottom: 30px; /* 30px from the bottom */
-        }
-
-        /* Show the snackbar when clicking on a button (class added with JavaScript) */
-        #snackbar.show {
-          visibility: visible; /* Show the snackbar */
-          /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
-          However, delay the fade out process for 2.5 seconds */
-          -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-          animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        /* Animations to fade the snackbar in and out */
-        @-webkit-keyframes fadein {
-          from {bottom: 0; opacity: 0;}
-          to {bottom: 30px; opacity: 1;}
-        }
-
-        @keyframes fadein {
-          from {bottom: 0; opacity: 0;}
-          to {bottom: 30px; opacity: 1;}
-        }
-
-        @-webkit-keyframes fadeout {
-          from {bottom: 30px; opacity: 1;}
-          to {bottom: 0; opacity: 0;}
-        }
-
-        @keyframes fadeout {
-          from {bottom: 30px; opacity: 1;}
-          to {bottom: 0; opacity: 0;}
-        }
-        
-        .slidecontainer {
-          width: 200px; /* Width of the outside container */
-        }
-
-
-        .slider {
-          -webkit-appearance: none;
-          width: 200px;
-          height: 15px;
-          border-radius: 5px;
-          background: #d3d3d3;
-          outline: none;
-          opacity: 0.7;
-          -webkit-transition: .2s;
-          transition: opacity .2s;
-        }
-
-        .sliderwide {
-          -webkit-appearance: none;
-          width: 400px;
-          height: 15px;
-          border-radius: 5px;
-          background: #d3d3d3;
-          outline: none;
-          opacity: 0.7;
-          -webkit-transition: .2s;
-          transition: opacity .2s;
-        }
-
-        .slider:hover {
-          opacity: 1;
-        }
-
-        .slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 25px;
-          height: 25px;
-          border-radius: 50%;
-          background: #4CAF50;
-          cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-          width: 25px;
-          height: 25px;
-          border-radius: 50%;
-          background: #4CAF50;
-          cursor: pointer;
-        }
-        .sliderheader {
-            margin: 10px;
-        }
-        strong {
-            font-size: 150%;
-            font-family: monospace;
-        }
-        .btn {
-          background-color: #DDD; /* Blue background */
-          border: none; /* Remove borders */
-          color: white; /* White text */
-          padding: 6px 6px; /* Some padding */
-          font-size: 16px; /* Set a font size */
-          cursor: pointer; /* Mouse pointer on hover */
-          border-radius: 100%;
-        }
-
-        .clipboardbutton {
-          background-color: #7177c7 !important;/* Blue background */
-        }
-
-        .clipboardbutton:hover {
-          background-color: #9198f2 !important;/* Blue background */
-        }
-
-        .addbtn {
-          margin: 20px;
-          float: right;
-          background-color: #7177c7; /* Blue background */
-          border: none; /* Remove borders */
-          color: white; /* White text */
-          padding: 6px 6px; /* Some padding */
-          font-size: 16px; /* Set a font size */
-          cursor: pointer; /* Mouse pointer on hover */
-          border-radius: 10%;
-          font-size: 20px;
-        }
-        .addbtn:hover {
-          background-color: #9198f2;
-        }        
-
-        /* Darker background on mouse-over */
-        .btn:hover {
-          background-color: #AAA;
-        }
-        /* The Modal (background) */
-        .modal {
-          display: none; /* Hidden by default */
-          position: fixed; /* Stay in place */
-          z-index: 1; /* Sit on top */
-          left: 0;
-          top: 0;
-          width: 100%; /* Full width */
-          height: 100%; /* Full height */
-          overflow: auto; /* Enable scroll if needed */
-          background-color: rgb(0,0,0); /* Fallback color */
-          background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-
-        /* Modal Content/Box */
-        .modal-content {
-          background-color: #fefefe;
-          margin: 15% auto; /* 15% from the top and centered */
-
-          padding: 20px;
-          padding-bottom: 30px;
-          border: 1px solid #888;
-          width: 880px; /* Could be more or less, depending on screen size */
-        }
-
-        .modal-body {
-            font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-            font-size: 150%;
-          background-color: #fefefe;
-          padding: 20px;
-          padding-right: 1px;
-          width: 100%; /* Could be more or less, depending on screen size */
-        }
-
-        /* The Close Button */
-        .modalClose {
-          color: #DDD;
-          float: right;
-          font-size: 28px;
-          font-weight: bold;
-        }
-
-        .modalClose:hover,
-        .modalClose:focus {
-          color: #AAA;
-          text-decoration: none;
-          cursor: pointer;
-        }
-        /* The Close Button */
-        .modalOk {
-          color: #629632;
-          font-size: 28px;
-          font-weight: bold;
-          float: right;
-          margin-top: 10px;
-        }
-
-        .modalOk:hover,
-        .modalOk:focus {
-          color: #6A8455;
-          text-decoration: none;
-          cursor: pointer;
-        }
-        .assetTable table {  
-            color: #333;
-            font-family: Helvetica, Arial, sans-serif;
-            border-collapse: 
-            collapse; border-spacing: 0; 
-            overflow: auto;
-        }
-
-        .assetTable td, th {  
-            border: 1px solid transparent; /* No more visible border */
-            height: 30px; 
-            transition: all 0.3s;  /* Simple transition for hover effect */
-        }
-
-        .assetTable th {  
-            background: #DFDFDF;  /* Darken header a bit */
-            font-weight: bold;
-            text-align: left
-        }
-
-        .assetTable td {  
-            background: #FAFAFA;
-        }
-
-        /* Cells in even rows (2,4,6...) are one color */        
-        .assetTable tr:nth-child(even) td { background: #F1F1F1; }   
-
-        /* Cells in odd rows (1,3,5...) are another (excludes header cells)  */        
-        .assetTable tr:nth-child(odd) td { background: #FEFEFE; }
-        .row {
-          display: flex;
-          margin: 20px;
-        }
-        
-        .output {
-            width: 400px;
-            height: 500px;
-            overflow: auto;
-            background: #DDD;
-            margin-left: 40px;
-            border: 1px solid black;
-        }
-
-        .tooltip {
-          position: relative;
-          display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-          visibility: hidden;
-          width: 270px;
-          background-color: #DDD;
-          color: black;
-          text-align: center;
-          border-radius: 6px;
-          padding: 5px 0;
-          position: absolute;
-          z-index: 1;
-          bottom: 100%;
-          left: 50%;
-          margin-left: -70px;
-          margin-bottom: 5px;
-          
-          /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
-          opacity: 0;
-          transition: opacity 0.5s;
-        }
-
-        .tooltip:hover .tooltiptext {
-          visibility: visible;
-          opacity: 1;
-        }
-    </style>
     <script>
-    var builtInCustoms = {
-        "builtin-Standard Stacked Pine": "```H4sIAAAAAAAACzv369xFRgZmBu1UR3dX5SWe+65a1e96KV3HyMDA8KspLNDJ+YZr493Nsr9Un04AickzGaVLfn3ltJyR75H7hpo8kBgDw56DDhEJDkCGPRjPr4PQ////B8kxMHywh8sxKEDpBnuInAKm3HYGB4icAMJMKBsADC5RqbAAAAA=```",
-
-        "builtin-Short Stacked Pine": "```H4sIAAAAAAAACzv369xFRgYmBu1UR3dX5SWe+65a1e96KV3HyMDAIM9klC759ZXTcka+R+4bavJAYgwMVw46RAg4MDAoADGDPcP8OnswvXiCPUgOKG4PlwOzgbTz2nsQuQtIchfAcgAQOD7pgAAAAA==```",
-    };
-    var presetAssets = {
-        "mixed": {
-            "floors": {"3911d10d-142b-4f33-9fea-5d3a10c53781": 10, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-            "randoms": [
-            {
-                "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-                "defaultpercent": 40,
-            },
-            {
-                "nguid": "d5b7910a-ae06-4ad3-91f6-cbbd8782bbea",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "4741652b-2345-49a4-bed5-3a7fbae91b7e",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "ed9bc853-bed5-443c-b45f-a7133d55011a",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "ff966bc3-dd95-4ca9-a217-1ca16fce6b52",
-                "defaultpercent": 10,
-            }
-            ]
-        },
-        "sparsepine": {
-            "floors": {"3911d10d-142b-4f33-9fea-5d3a10c53781": 20, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-            "randoms": [
-            {
-                "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-                "defaultpercent": 40,
-            },
-            {
-                "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "builtin-Standard Stacked Pine",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "builtin-Short Stacked Pine",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "ff966bc3-dd95-4ca9-a217-1ca16fce6b52",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "4741652b-2345-49a4-bed5-3a7fbae91b7e",
-                "defaultpercent": 10,
-            }
-        ]},
-        "heavypine": {
-            "floors": {"01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-            "randoms": [
-            {
-                "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-                "defaultpercent": 40,
-            },
-            {
-                "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "builtin-Standard Stacked Pine",
-                "defaultpercent": 40,
-            },
-            {
-                "nguid": "builtin-Short Stacked Pine",
-                "defaultpercent": 30,
-            },
-            {
-                "nguid": "ff966bc3-dd95-4ca9-a217-1ca16fce6b52",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "4741652b-2345-49a4-bed5-3a7fbae91b7e",
-                "defaultpercent": 10,
-            }
-        ]},
-        "sparsedead": {
-            "floors": {"0582fb0c-9fd0-4355-9bf8-821027ecc74d": 20, "3911d10d-142b-4f33-9fea-5d3a10c53781": 30, "3911d10d-142b-4f33-9fea-5d3a10c53781": 30, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-            "randoms": [
-            {
-                "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-                "defaultpercent": 30,
-            },
-            {
-                "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-                "defaultpercent": 20,
-            },
-            {
-                "nguid": "ed9bc853-bed5-443c-b45f-a7133d55011a",
-                "defaultpercent": 7,
-            },
-            {
-                "nguid": "80c2e070-10eb-4608-87a7-fa3d75e929c2",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "12f8679e-6100-4da2-a3bd-a3fcc925ab30",
-                "defaultpercent": 6,
-            },
-            {
-                "nguid": "2aeacfa9-b84d-418f-86c7-cdb85e2f4c13",
-                "defaultpercent": 6,
-            }
-        ]},
-        "heavydead": {
-            "floors": {"0582fb0c-9fd0-4355-9bf8-821027ecc74d": 30, "3911d10d-142b-4f33-9fea-5d3a10c53781": 20, "3911d10d-142b-4f33-9fea-5d3a10c53781": 20, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-            "randoms": [
-            {
-                "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-                "defaultpercent": 30,
-            },
-            {
-                "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-                "defaultpercent": 20,
-            },
-            {
-                "nguid": "ed9bc853-bed5-443c-b45f-a7133d55011a",
-                "defaultpercent": 20,
-            },
-            {
-                "nguid": "80c2e070-10eb-4608-87a7-fa3d75e929c2",
-                "defaultpercent": 20,
-            },
-            {
-                "nguid": "12f8679e-6100-4da2-a3bd-a3fcc925ab30",
-                "defaultpercent": 10,
-            },
-            {
-                "nguid": "2aeacfa9-b84d-418f-86c7-cdb85e2f4c13",
-                "defaultpercent": 10,
-            }
-        ]}
-    };
-
-    function GetWeightedValue(weightedDict) {
+        function GetWeightedValue(weightedDict) {
         weightedArr = [];
         Object.entries(weightedDict).forEach(function (val) {
             for (let j = 0; j < val[1]; ++j) {
@@ -540,7 +41,7 @@
         var timeoutSeconds = ((timeout / 1000) - 0.5) + "s";
         x.style.webkitAnimation = "fadein 0.5s, fadeout 0.5s " + timeoutSeconds;
         x.style.animation = "fadein 0.5s, fadeout 0.5s " + timeoutSeconds;
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, timeout);          
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, timeout);
     }
     function CopyToClipboard() {
         var forest = document.getElementById("forest");
@@ -565,7 +66,7 @@
 
     function AddFloor(floors, width, depth, center_height) {
         //console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Height: " + center_height + " Percentage: " + percentage);
-        
+
         // var nguidAssets = [];
         // nguids.forEach(function(nguid) {
         //     nguidAssets.push(TalespireSlabs.GetAsset(nguid));
@@ -582,7 +83,7 @@
                 }
                 //console.log(center_height);
                 output[selectedFloorGuid].push({'rotation': Math.floor(Math.random() * 3) * 4,
-                    'bounds': 
+                    'bounds':
                     {
                         'center': {'x': w*2, 'y': center_height, 'z': d*2},
                         'extents': {'x': 1, 'y': 1, 'z': 1}
@@ -615,7 +116,7 @@
                     continue;
                 }
                 assets.push({'rotation': Math.floor(Math.random() * 3) * 4,
-                    'bounds': 
+                    'bounds':
                     {
                         'center': {'x': w*2, 'y': center_height, 'z': d*2},
                         'extents': {'x': 1, 'y': 1, 'z': 1}
@@ -649,10 +150,10 @@
                 if (a == 0) {
                     centerMin[0] = Math.min(asset['bounds']['center']['x'], centerMin[0]);
                     centerMin[1] = Math.min(asset['bounds']['center']['y'], centerMin[1]);
-                    centerMin[2] = Math.min(asset['bounds']['center']['z'], centerMin[2]);                            
+                    centerMin[2] = Math.min(asset['bounds']['center']['z'], centerMin[2]);
                 }
             }
-        }        
+        }
         for (var w = 0; w < width; w++) {
             for (var d = 0; d < depth; d++) {
                 var center_height;
@@ -674,11 +175,11 @@
                     for (var x = 0; x < customAssetPayload[a]['assets'].length; x++) {
                         var asset = customAssetPayload[a]['assets'][x];
                         assets.push({'rotation': newRotation + asset['rotation'],
-                            'bounds': 
+                            'bounds':
                             {
                                 'center': {'x': (asset['bounds']['center']['x'] - centerMin[0]) + (w*2), 'y': asset['bounds']['center']['y'] - asset['bounds']['extents']['y'] + center_height, 'z': (asset['bounds']['center']['z'] - centerMin[2]) + d*2},
                                 'extents': {'x': asset['bounds']['extents']['x'], 'y': 1, 'z': asset['bounds']['extents']['z']}
-                            }                    
+                            }
                         });
                     }
                     console.log("guid: " + customAssetPayload[a]['nguid'] + " Asset Count: " + assets.length);
@@ -690,7 +191,7 @@
         return assetPayload;
     }
 
-    function WriteRandomForest() { 
+    function WriteRandomForest() {
         clearPrintResults();
 
         var slab = [];
@@ -742,7 +243,7 @@
         document.getElementById("forest").value = results;
         printResults(TalespireSlabs.DecodeSlab(results));
         ShowMessage("Complete", 2000);
-    }    
+    }
 
     function ReadSlab() {
         clearPrintResults();
@@ -891,14 +392,14 @@
                         <input type="text" id="assetSearch" onkeyup="searchAssets()" style="font-size: 100%;font-family:Candara, Calibri, Segoe, FontAwesome" placeholder="&#xf002; Search"><label id="swapassets"><input onclick="SwapAssets()" style="margin-left: 20px;" type="checkbox" id="custom"><span style="font-size: 80%;">Show Custom Assets</span></label>
                         <div style="width: 812px;" id="assetTable"></div>
 
-                    
+
                         <div onclick='AssetSelect.style.display = "none";' class="modalOk"><i class="fa fa-check-square"></i> Done</div>
                     </div>
-                    
+
                   </div>
 
                 </div>
-                
+
             </div>
             <div class="column">
                 <h3 style="margin-left: 40px">Decoded Results</h3>
@@ -931,7 +432,7 @@
         function SwapAssets() {
             if (document.getElementById("custom").checked) {
                 document.getElementById("standardassets").style.display = "none";
-                document.getElementById("customassets").style.display = "block";                
+                document.getElementById("customassets").style.display = "block";
             } else {
                 document.getElementById("standardassets").style.display = "block";
                 document.getElementById("customassets").style.display = "none";
@@ -995,7 +496,7 @@
             tmpTable += "</table></div></td></tr></table></span>";
 
             tmpTable += '<span id="customassets" style="display: none"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table class="assetTable" width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
-            
+
             tmpTable += '<tr><th>Name</th><th></th><th></th></tr>';
 
             Object.entries(window.localStorage).forEach(function (storeVal) {
@@ -1015,7 +516,7 @@
         document.getElementById("slabwidth").innerHTML = widthslider.value;
         widthslider.oninput = function() {
           document.getElementById("slabwidth").innerHTML = this.value;
-        }            
+        }
         var depthslider = document.getElementById("depthslider");
         document.getElementById("slabdepth").innerHTML = depthslider.value;
         depthslider.oninput = function() {
@@ -1036,7 +537,7 @@
                 AddAssetToGround(prop_asset[0], prop_asset[1]);
             });
         }
-        
+
         PopulateAssetList(presetAssets['mixed']);
     </script>
     <div class="footer"><i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i>
