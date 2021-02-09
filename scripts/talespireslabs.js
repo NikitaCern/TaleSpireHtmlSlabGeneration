@@ -21,13 +21,17 @@ document.head.appendChild(script);
 var script = document.createElement("script");
 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.6.4/math.min.js';
 document.head.appendChild(script);
+// Noise!
+var script = document.createElement("script");
+script.src = 'https://cdn.jsdelivr.net/npm/noisejs';
+document.head.appendChild(script);
 
 var TalespireSlabs = (function () {
 
     'use strict';
-    
-    // Any methods or parameters that 
-    var publicAPIs = {};    
+
+    // Any methods or parameters that
+    var publicAPIs = {};
     var outputElement;
 
     publicAPIs.GetAsset = function(nguid) {
@@ -46,7 +50,7 @@ var TalespireSlabs = (function () {
         } else {
             return Array.from(byteArray, function(byte) {
                 return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-            }).join('')            
+            }).join('')
         }
     }
 
@@ -66,11 +70,11 @@ var TalespireSlabs = (function () {
         var b = hexToBytes(nguid);
         //console.log("Hex to Bytes: " + b);
         // rearrange bytes into bin format (smarter ways but brute force works fine)
-        return [b[3], b[2], b[1], b[0], b[5], b[4], b[7], b[6], b[8], 
+        return [b[3], b[2], b[1], b[0], b[5], b[4], b[7], b[6], b[8],
                 b[9], b[10], b[11], b[12], b[13], b[14], b[15]]
     }
 
-    publicAPIs.CreateSlab = function(layouts=[]) { 
+    publicAPIs.CreateSlab = function(layouts=[]) {
         // Create a large ArrayBuffer and DataView, We can slice what we don't need at the end.
         var buffer = new ArrayBuffer(Math.pow(2, 20));
         var bufferDataView = new DataView(buffer);
@@ -83,11 +87,11 @@ var TalespireSlabs = (function () {
         bufferDataView.setUint16(bufPtr, 1, true);
         bufPtr += 2;
 
-        // Write layout count        
+        // Write layout count
         bufferDataView.setUint16(bufPtr, layouts.length, true);
         bufPtr += 2;
         //01c3a210-94fb-449f-8c47-993eda3e7126
-        layouts.forEach(function(layout){ 
+        layouts.forEach(function(layout){
             nguidHexToBytes(layout['nguid'].replace(/[- ]/g, "")).forEach(function(byte) {
                 bufferDataView.setUint8(bufPtr, byte, true);
                 bufPtr += 1;
@@ -101,7 +105,7 @@ var TalespireSlabs = (function () {
         var first = true;
         var unionMin = [0, 0, 0];
         var unionMax = [0, 0, 0];
-        layouts.forEach(function(layout){ 
+        layouts.forEach(function(layout){
             // Write asset locations
             layout['assets'].forEach(function(asset) {
                 //console.log(asset);
@@ -117,13 +121,13 @@ var TalespireSlabs = (function () {
                 bufPtr += 4;
                 bufferDataView.setFloat32(bufPtr, asset['bounds']['extents']['z'], true);
                 bufPtr += 4;
-                
+
                 bufferDataView.setUint8(bufPtr, asset['rotation'], true);
                 bufPtr += 4;
                 //console.log(math.subtract([10, 12, 14], [1, 1, 1]));
                 var centerVector3 = [asset['bounds']['center']['x'], asset['bounds']['center']['y'], asset['bounds']['center']['z']]
                 var extentsVector3 = [asset['bounds']['extents']['x'], asset['bounds']['extents']['y'], asset['bounds']['extents']['z']]
-                
+
                 if (first) {
                     first = false;
                     unionMin = math.subtract(centerVector3, extentsVector3);
@@ -132,11 +136,11 @@ var TalespireSlabs = (function () {
 
                 var min = math.subtract(centerVector3, extentsVector3);
                 var max = math.add(centerVector3, extentsVector3);
-                
+
                 unionMin[0] = Math.min(min[0], unionMin[0]);
                 unionMin[1] = Math.min(min[1], unionMin[1]);
                 unionMin[2] = Math.min(min[2], unionMin[2]);
-                
+
                 unionMax[0] = Math.max(max[0], unionMax[0]);
                 unionMax[1] = Math.max(max[1], unionMax[1]);
                 unionMax[2] = Math.max(max[2], unionMax[2]);
@@ -163,7 +167,7 @@ var TalespireSlabs = (function () {
         bufPtr += 4;
         bufPtr += 4;
 
-        var gzdata        = pako.gzip(buffer.slice(0, bufPtr));        
+        var gzdata        = pako.gzip(buffer.slice(0, bufPtr));
 
         return '```' + btoa(String.fromCharCode.apply(null, gzdata)) + '```';
     }
@@ -227,7 +231,7 @@ var TalespireSlabs = (function () {
                         "-" + toHexString(ng_b2) + toHexString(ng_b1) + "-" +
                         toHexString(ng_c2) + toHexString(ng_c1) + "-" +
                         toHexString(ng_d) + toHexString(ng_e) + "-" +
-                        toHexString(ng_f) + toHexString(ng_g) + toHexString(ng_h) + 
+                        toHexString(ng_f) + toHexString(ng_g) + toHexString(ng_h) +
                         toHexString(ng_i) + toHexString(ng_j) + toHexString(ng_k)
             var assetCount = new Uint16Array(data.buffer.slice(bufPtr, bufPtr + 2))[0];
             bufPtr += 2;
@@ -241,7 +245,7 @@ var TalespireSlabs = (function () {
         console.log("Total Asset Count: " + totalAssets);
         results += "<p>Total Asset Count: " + totalAssets + "</p>";
         var AssetLocations = [];
-        
+
         for (i = 0; i < totalAssets; i++) {
             // Each AssetCopyData is 28 bytes
             var centerVector3 = new DataView(data.buffer.slice(bufPtr, bufPtr + 12))
@@ -257,7 +261,7 @@ var TalespireSlabs = (function () {
 
             var rotation = new Uint8Array(data.buffer.slice(bufPtr, bufPtr + 1))[0];
             bufPtr += 4;
-            // printResults("Asset Rotation: " + rotation);            
+            // printResults("Asset Rotation: " + rotation);
             // printResults("Center X: " + centerX + " Y: " + centerY + " Z: " + centerZ);
             // printResults("Extents X: " + extentsX + " Y: " + extentsY + " Z: " + extentsZ);
 
@@ -300,11 +304,11 @@ var TalespireSlabs = (function () {
                     });
 
                 results += "<pre><b style='margin-left: 15px'>Rotation</b>: " + AssetLocations[assetIdx]["rotation"];
-                results += "<br><b style='margin-left: 15px'>Center</b> X: " + roundNumber(AssetLocations[assetIdx]["centerX"], 4) + 
-                    " Y: " + roundNumber(AssetLocations[assetIdx]["centerY"], 4) + 
-                    " Z: " + roundNumber(AssetLocations[assetIdx]["centerZ"], 4) + 
-                    " <b>Extents</b> X: " + roundNumber(AssetLocations[assetIdx]["extentsX"], 4) + 
-                    " Y: " + roundNumber(AssetLocations[assetIdx]["extentsY"], 4) + 
+                results += "<br><b style='margin-left: 15px'>Center</b> X: " + roundNumber(AssetLocations[assetIdx]["centerX"], 4) +
+                    " Y: " + roundNumber(AssetLocations[assetIdx]["centerY"], 4) +
+                    " Z: " + roundNumber(AssetLocations[assetIdx]["centerZ"], 4) +
+                    " <b>Extents</b> X: " + roundNumber(AssetLocations[assetIdx]["extentsX"], 4) +
+                    " Y: " + roundNumber(AssetLocations[assetIdx]["extentsY"], 4) +
                     " Z: " + roundNumber(AssetLocations[assetIdx]["extentsZ"], 4) + "</pre>";
                 assetIdx++;
             }
@@ -313,7 +317,7 @@ var TalespireSlabs = (function () {
         if (getpayload) {
             return payload;
         } else {
-            return results;            
+            return results;
         }
     }
 
@@ -376,4 +380,3 @@ var TalespireSlabs = (function () {
 
     return publicAPIs;
 })();
-
