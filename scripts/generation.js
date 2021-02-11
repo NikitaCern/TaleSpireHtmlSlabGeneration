@@ -1,40 +1,77 @@
-function AddTerrain(floors, width, depth, height, seed, scaleW, scaleD, offsetW, offsetD, center_height) {
-  //console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Height: " + center_height + " Percentage: " + percentage);
+// This file conains all the functions that pretend to the generation of terrain and addition of scatered objects onto it
+
+
+//Function uses perlin noise to generate a value at x,y coordinates
+function generateNoise(w,d){
+  var noise = new Noise(seed);
+  var result = 1+noise.perlin2(w*scaleW/200.0,d*scaleD/200.0);
+  result = Math.floor(height * result);
+  return result;
+}
+
+//Seeded random function
+function getRandom(){
+  return Math.random(seed);
+}
+
+//Function returns the elevation at point x,y
+function getElevation(w,d){
+  return elevation[w*width+d];
+}
+
+//Function sets the elevation value at point x,y
+function setElevation(w,d,value){
+  elevation[w*width+d] = value;
+}
+
+//Function generates a 2d array of elevation
+function generateElevation(){
+  for (var w = 0; w < width; w++) {
+    for (var d = 0; d < depth; d++) {
+      elevation[w*width+d] = generateNoise(w,d);
+    }
+  }
+}
+
+//Function generates terrain with a perlin noise map
+function GenerateTerrain(floor, center_height){
+  generateElevation();
+
   var output = {};
   var heightArray = [];
-  var noise = new Noise(seed);
 
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
-      var selectedFloorGuid = GetWeightedValue(floors);
+      var selectedFloorGuid = GetWeightedValue(floor);
+      var selectedFloor = TalespireSlabs.GetAsset(selectedFloorGuid);
 
-      var tileHeight = TalespireSlabs.GetAsset(selectedFloorGuid)['height'];
-      var tileWidth = TalespireSlabs.GetAsset(selectedFloorGuid)['width'];
-      var tileDepth = TalespireSlabs.GetAsset(selectedFloorGuid)['depth'];
+      var tileHeight = selectedFloor['height'];
+      var tileWidth = selectedFloor['width']-1.0;
+      var tileDepth = selectedFloor['depth']-1.0;
 
-      var noiseValue = Math.floor(height * (1 + noise.perlin2(w / scaleW, d / scaleD)));
+      groundTileDepth = tileDepth;
+      groundTileWidth = tileWidth;
 
-      var finalHeight = (noiseValue * 2 * tileHeight) - (tileHeight * 1.5);
+      var height = getElevation(w,d);
+      setElevation(w,d, tileHeight*height);
 
-      heightArray.push([w, d, finalHeight]);
-
-      for (var h = finalHeight - 2; h <= finalHeight; h++) {
+      for (var h = height - terrainThickness; h < height; h++) {
         if (output[selectedFloorGuid] == null) {
           output[selectedFloorGuid] = [];
         }
         //console.log(center_height);
         output[selectedFloorGuid].push({
-          'rotation': 0,
+          'rotation':Math.floor(getRandom()*3)*4,
           'bounds': {
             'center': {
-              'x': w * (tileWidth - 1),
-              'y': (tileHeight * 2.0 * h) + tileHeight,
-              'z': d * (tileDepth - 1)
+              'x': w*tileWidth,
+              'y': (tileHeight * h * 2.0) ,
+              'z': d*tileDepth
             },
             'extents': {
-              'x': 1,
-              'y': 1,
-              'z': 1
+              'x': tileWidth*0.5,
+              'y': tileHeight,
+              'z': tileDepth*0.5
             }
           }
         });
@@ -48,10 +85,44 @@ function AddTerrain(floors, width, depth, height, seed, scaleW, scaleD, offsetW,
       'assets': outputItem[1]
     });
   });
-  return [response, heightArray];
+  return response;
 }
 
+//Function that generates scatter objects ontop of the terrain
+function GenerateScatter(sliderpercents) {
 
+  sliderpercents.forEach(function(percent) {
+
+      if (percent.getAttribute("custom")) {
+        var customAssetData = AddCustomAsset(percent.getAttribute("nguid"), percent.value);
+
+        for (var i = 0; i < customAssetData.length; i++) {
+          var found = false;
+
+          for (var s = 0; s < slab.length; s++) {
+
+            if (slab[s]['nguid'] == customAssetData[i]['nguid']) {
+              found = true;
+              for (var a = 0; a < customAssetData[i]['assets'].length; a++) {
+                slab[s]['assets'].push(customAssetData[i]['assets'][a]);
+              }
+              break;
+            }
+          }
+          if (!found) {
+            console.log("!found",customAssetData[i]);
+            slab.push(customAssetData[i]);
+          }
+        }
+      } else {
+        var x = AddAsset(percent.getAttribute("nguid"), percent.value);
+        console.log("!custom",x)
+        slab.push(x); // 1.38
+      }
+    });
+}
+
+//Function for selecting a random object with its corresponding weight
 function GetWeightedValue(weightedDict) {
   weightedArr = [];
   Object.entries(weightedDict).forEach(function(val) {
@@ -59,42 +130,39 @@ function GetWeightedValue(weightedDict) {
       weightedArr.push(val[0]);
     }
   });
-  return weightedArr[Math.floor(Math.random() * weightedArr.length)];
+  return weightedArr[Math.floor(getRandom() * weightedArr.length)];
 }
 
-
-function AddAsset(nguid, width, depth, heightArray, percentage) {
-  console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
+//Functon for adding simple scatter objects ontop of terrain
+function AddAsset(nguid, percentage) {
+  //console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
   var asset = TalespireSlabs.GetAsset(nguid);
+
+  var tileHeight = asset['height'];
+  var tileWidth = asset['width'];
+  var tileDepth = asset['depth'];
+
+console.log(tileWidth);
   var assets = [];
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
-      var center_height;
-      //console.log(center_height);
-      heightArray.forEach(function(h) {
-        if (h[0] == w && h[1] == d) {
-          center_height = h[2] + 1.13;
-          return;
-        }
-      });
-      if ((Math.floor(random() * 100) + 1) > percentage) {
-        continue;
-      }
-      assets.push({
-        'rotation': 0,
-        'bounds': {
-          'center': {
-            'x': w * 2,
-            'y': center_height,
-            'z': d * 2
-          },
-          'extents': {
-            'x': 1,
-            'y': 1,
-            'z': 1
+      if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
+        assets.push({
+          'rotation': Math.floor(getRandom()*3)*4*0,
+          'bounds': {
+            'center': {
+              'x': w*tileWidth,
+              'y': getElevation(w,d),
+              'z': d*tileDepth
+            },
+            'extents': {
+              'x': tileWidth,
+              'y': 1,
+              'z': tileDepth
+            }
           }
-        }
-      });
+        });
+      }
     }
   }
   return {
@@ -103,8 +171,9 @@ function AddAsset(nguid, width, depth, heightArray, percentage) {
   };
 }
 
-function AddCustomAsset(customName, width, depth, heightArray, percentage) {
-  console.log("Adding custom asset: " + customName + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
+//Functon for adding custom scatter objects ontop of terrain
+function AddCustomAsset(customName ,percentage) {
+  //console.log("Adding custom asset: " + customName + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
   var customAssetPayload;
   if (customName.startsWith('builtin')) {
     customAssetPayload = TalespireSlabs.DecodeSlabToPayload(builtInCustoms[customName]);
@@ -132,19 +201,9 @@ function AddCustomAsset(customName, width, depth, heightArray, percentage) {
   }
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
-      var center_height;
-      //console.log(center_height);
-      heightArray.forEach(function(h) {
-        if (h[0] == w && h[1] == d) {
-          center_height = h[2] + 1.13;
-          return;
-        }
-      });
-      if ((Math.floor(random() * 100) + 1) > percentage) {
-        continue;
-      }
-
-      newRotation = Math.floor(Math.random() * 3) * 4
+      var center_height = getElevation( w, d);
+      if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
+      newRotation = Math.floor(getRandom() * 3) * 4
       for (var a = 0; a < customAssetPayload.length; a++) {
         var assets = [];
         //var centerMin;
@@ -173,6 +232,7 @@ function AddCustomAsset(customName, width, depth, heightArray, percentage) {
           'assets': assets
         })
       }
+    }
     }
   }
   return assetPayload;

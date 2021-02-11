@@ -1,9 +1,13 @@
 var presetAssets = {
   "mixed": {
     "floors": {
-      "	bdf12fe7-8fa6-4474-878e-7e5847a34407": 100
+      "	01c3a210-94fb-449f-8c47-993eda3e7126": 100
     },
-    "randoms": []
+    "randoms": [{
+      "nguid":"20fae06d-ce0f-48bf-8b34-fcbcd6ef3836",
+      "defaultpercent":100
+    }
+    ]
   },
   "sparsepine": {
     "floors": {

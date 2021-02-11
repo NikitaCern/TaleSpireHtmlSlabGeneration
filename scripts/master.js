@@ -1,5 +1,6 @@
+
 var includes = [
-  'assetdata.js',
+  'scripts/assetdata.js',
   'https://cdn.jsdelivr.net/pako/1.0.3/pako.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.6.4/math.min.js',
   'https://cdn.jsdelivr.net/npm/noisejs'
@@ -11,13 +12,28 @@ includes.forEach((include) => {
   document.head.appendChild(script);
 });
 
-var seed = new Date() / 1000;;
+var seed = 0;
 
-function random() {
-  var x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
+var slab = [];
 
+var width = 0;
+var depth = 0;
+var height = 0;
+
+var groundTileWidth;
+var groundTileDepth;
+
+var noiseWscale = 0;
+var noiseDscale = 0;
+
+var noiseWoffset = 0;
+var noiseDoffset = 0;
+
+var terrainThickness = 2;
+
+var heightArray;
+
+var elevation;
 
 
 /*

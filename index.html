@@ -15,12 +15,12 @@
     <textarea style="margin: 10px; height: 200px; width: 850px; resize: vertical;" id="forest"></textarea>
 
     <div style="width: 850px; margin: 10px;" class="btn-group">
-      <button id="button" onclick="WriteRandomForest();">GenerateTerrain <span class="tooltip"><i class="fa fa-question-circle"></i>
+      <button id="button" onclick="Generate();">GenerateTerrain <span class="tooltip"><i class="fa fa-question-circle"></i>
           <span class="tooltiptext">Clicking this button will take the values from slab size and randomness below and create a slab that can be pasted in to TaleSpire.</span>
         </span></button>
       <button class="clipboardbutton" id="button" onclick="CopyToClipboard();">Copy To Clipboard <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">This button copies the contents of the above into your
             clipboard.</span></button>
-      <button class="clipboardbutton" id="button" onclick="ShowSlabDialog();">Save Custom Slab <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">After pasting a slab you can store it as a custom asset that can be
+      <button class="clipboardbutton" id="button" onclick="ShowSaveDialog();">Save Custom Slab <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">After pasting a slab you can store it as a custom asset that can be
             used later to insert as a random asset.</span></button>
       <button style="float: right; " id="button" onclick='ReadSlab();'>Read Pasted Slab <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">Reads the value that has been pasted (from TaleSpire) and prints out the
             associated data in the Decoded Results.</span></button>
@@ -57,8 +57,8 @@
             <th><span class="sliderheader">Slab Height: <strong><span id="TerrainHeight"></span></strong></span></th>
           </tr>
           <tr>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="widthslider" onchange="sliderUpdate(this, 'TerrainWidth')"></td>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="depthslider" onchange="sliderUpdate(this, 'TerrainDepth')"></td>
+            <td><input type="range" min="1" max="50" value="3" class="slider" id="widthslider" onchange="sliderUpdate(this, 'TerrainWidth')"></td>
+            <td><input type="range" min="1" max="50" value="3" class="slider" id="depthslider" onchange="sliderUpdate(this, 'TerrainDepth')"></td>
             <td><input type="range" min="1" max="20" value="5" class="slider" id="heightslider" onchange="sliderUpdate(this, 'TerrainHeight')"></td>
           </tr>
           <tr>
@@ -99,7 +99,7 @@
             <div class="modal-body">
               <div onclick='AssetSelect.style.display = "none";' class="modalClose"><i class="fa fa-close"></i></div>
               <h3 style="margin-top: -25px">Asset Selection</h3>
-              <input type="text" id="assetSearch" onkeyup="searchAssets()" style="font-size: 100%;font-family:Candara, Calibri, Segoe, FontAwesome" placeholder="&#xf002; Search"><label id="swapassets"><input onclick="SwapAssets()"
+              <input type="text" id="assetSearch" onkeyup="searchAssets()" style="font-size: 100%;font-family:Candara, Calibri, Segoe, FontAwesome" placeholder="&#xf002; Search"><label id="swapassets"><input onclick="ShowCustomAssets()"
                   style="margin-left: 20px;" type="checkbox" id="custom"><span style="font-size: 80%;">Show Custom Assets</span></label>
               <div style="width: 812px;" id="assetTable"></div>
               <div onclick='AssetSelect.style.display = "none";' class="modalOk"><i class="fa fa-check-square"></i> Done</div>
@@ -116,95 +116,15 @@
   <span style="float: none"></span>
   <div id="snackbar"></div>
 
+  <script src="presets/customs.js"></script>
+  <script src="presets/presets.js"></script>
+
   <script src="scripts/talespireslabs.js"></script>
   <script src="scripts/assetdata.js"></script>
   <script src="scripts/input_output.js"></script>
   <script src="scripts/generation.js"></script>
+
   <script src="scripts/master.js"></script>
-
-  <script src="presets/customs.js"></script>
-  <script src="presets/presets.js"></script>
-  <script>
-    var assetWindowGround = false;
-
-    function ShowAssetWindow(ground = false) {
-      assetWindowGround = ground;
-      document.getElementById('AssetSelect').style.display = "block";
-      if (ground) {
-        document.getElementById("custom").checked = false;
-        SwapAssets();
-        document.getElementById('swapassets').style.display = "none";
-      } else {
-        document.getElementById('swapassets').style.display = "inline";
-      }
-    }
-
-    document.querySelector(".modal").addEventListener("click", function(e) {
-      if (e.target.className == "modal") {
-        document.getElementById('AssetSelect').style.display = "none";
-      }
-
-    });
-
-    function SwapAssets() {
-      if (document.getElementById("custom").checked) {
-        document.getElementById("standardassets").style.display = "none";
-        document.getElementById("customassets").style.display = "block";
-      } else {
-        document.getElementById("standardassets").style.display = "block";
-        document.getElementById("customassets").style.display = "none";
-      }
-    }
-
-    function PopulateModalAssets() {
-      var tmpTable =
-        '<span id="standardassets" style="display: block;"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table  width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
-      var assets = TalespireSlabs.GetAllAssets();
-
-      tmpTable += '<tr><th>Name</th><th>GUID</th><th></th></tr>';
-
-      Object.entries(assets).forEach(function(asset) {
-        tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
-          '\', 10);}" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
-      });
-      tmpTable += "</table></div></td></tr></table></span>";
-
-      tmpTable +=
-        '<span id="customassets" style="display: none"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table class="assetTable" width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
-
-      tmpTable += '<tr><th>Name</th><th></th><th></th></tr>';
-
-      Object.entries(window.localStorage).forEach(function(storeVal) {
-        // console.log(storeVal);
-        if (storeVal[0].startsWith('slab-')) {
-          tmpTable += '<tr><td>' + storeVal[0].substring(storeVal[0].indexOf('-') + 1) + '</td><td><button onClick="RemoveFromLocal(\'' + storeVal[0] +
-            '\');" class="addbtn"><i class="fa fa-trash"> Delete</i></button></td><td><button onClick="AddAssetToList(\'' + storeVal[0] + '\', 10, true);" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
-        }
-      });
-
-      tmpTable += "</table></div></td></tr></table></span>";
-      document.getElementById("assetTable").innerHTML = tmpTable;
-    }
-
-    PopulateModalAssets();
-
-    function PopulateAssetList(assetList) {
-      document.getElementById("groundsliders").innerHTML = "";
-      document.getElementById("randomsliders").innerHTML = "";
-      assetList['randoms'].forEach(function(prop_asset) {
-        if (prop_asset['nguid'].startsWith('builtin')) {
-          AddAssetToList(prop_asset['nguid'], prop_asset['defaultpercent'], true);
-        } else {
-          AddAssetToList(prop_asset['nguid'], prop_asset['defaultpercent']);
-        }
-      });
-      Object.entries(assetList['floors']).forEach(function(prop_asset) {
-        AddAssetToGround(prop_asset[0], prop_asset[1]);
-      });
-    }
-
-    PopulateAssetList(presetAssets['mixed']);
-  </script>
 
   <div class="footer"><i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i>
     <br>D20ArmyKnife © 2020
