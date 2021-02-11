@@ -1,4 +1,3 @@
-
 var includes = [
   'assetdata.js',
   'https://cdn.jsdelivr.net/pako/1.0.3/pako.min.js',
@@ -13,13 +12,17 @@ includes.forEach((include) => {
 });
 
 var seed = new Date() / 1000;;
+
 function random() {
   var x = Math.sin(seed++) * 10000;
   return x - Math.floor(x);
 }
 
-var flag = false;
+
+
 /*
+var flag = false;
+
 function UpdateNoise(image){
   var canvas = document.getElementsByTagName('canvas')[0];
   var ctx = canvas.getContext('2d');
@@ -91,77 +94,3 @@ function imageCreation( width, depth, height, seed, scaleW, scaleD, offsetW, off
   return UpdateNoise(image);
 }
 */
-
-
-function ReadSlab() {
-  clearPrintResults();
-  try {
-      printResults(TalespireSlabs.DecodeSlab(document.getElementById("forest").value));
-  } catch (err) {
-      console.log(err);
-      ShowError(err);
-  }
-}
-
-function RemoveFromLocal(name) {
-  window.localStorage.removeItem(name);
-  PopulateModalAssets();
-  SwapAssets();
-  ShowMessage(name.substring(name.indexOf('-') + 1) + " has been removed.", 5000);
-}
-
-function ShowSlabDialog() {
-  document.getElementById('slabname').value = "";
-  document.getElementById('SlabNameDialog').style.display = "block";
-}
-
-function SaveToLocal() {
-  // var customSlabName = prompt("Custom Slab Name", "");
-  var customSlabName = document.getElementById('slabname').value;
-  console.log("Custom Slab Name: " + customSlabName);
-  if (customSlabName == null) {
-      return;
-  }
-  if (customSlabName == "") {
-      ShowError("You must give the slab a name.");
-  }
-  clearPrintResults();
-  var slabValue = document.getElementById("forest").value;
-  try {
-      printResults(TalespireSlabs.DecodeSlab(slabValue));
-  } catch (err) {
-      console.log(err);
-      ShowError(err);
-      return;
-  }
-  window.localStorage.setItem('slab-' + customSlabName, slabValue);
-  PopulateModalAssets();
-  SwapAssets();
-  ShowMessage("Saved Slab as: " + customSlabName + " <br>To delete or select use the \"Add Asset\" window.", 6000);
-
-}
-
-function searchAssets() {
-// Declare variables
-var input, filter, table, tr, td, i, txtValue;
-input = document.getElementById("assetSearch");
-filter = input.value.toUpperCase();
-table = document.getElementById("assetTable");
-tr = table.getElementsByTagName("tr");
-
-// Loop through all table rows, and hide those who don't match the search query
-for (i = 0; i < tr.length; i++) {
-  //td = tr[i].getElementsByTagName("td")[0];
-  tds = tr[i].getElementsByTagName("td");
-  for (var x = 0; x < tds.length; x++) {
-    txtValue = tds[x].textContent || tds[x].innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      tr[i].style.display = "";
-      break;
-    } else {
-      tr[i].style.display = "none";
-    }
-
-  }
-}
-}
