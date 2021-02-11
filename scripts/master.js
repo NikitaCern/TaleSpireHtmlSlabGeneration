@@ -145,7 +145,7 @@ function AddTerrain(floors, width, depth, height, seed, scaleW, scaleD, offsetW,
                 var tileDepth = TalespireSlabs.GetAsset(selectedFloorGuid)['depth'];
                 console.log("  tileHeight:"+tileHeight+"  tileWidth:"+tileWidth+"  tileDepth:"+tileDepth);
 
-                var noiseValue = Math.floor(height*(1+noise.perlin2( (w/scaleW)+(offsetW/scaleW) , (d/scaleD)+(offsetD/scaleD) )));
+                var noiseValue = Math.floor(height*(1+noise.perlin2( w/scaleW , d/scaleD )));
 
                 var finalHeight = (noiseValue*2*tileHeight)-(tileHeight*1.5);
 
@@ -156,10 +156,10 @@ function AddTerrain(floors, width, depth, height, seed, scaleW, scaleD, offsetW,
                       output[selectedFloorGuid] = [];
                   }
                   //console.log(center_height);
-                  output[selectedFloorGuid].push({'rotation': Math.floor(Math.random() * 3) * 4,
+                  output[selectedFloorGuid].push({'rotation': 0,
                       'bounds':
                       {
-                          'center': {'x': w*2, 'y': (tileHeight*2.0*h)+tileHeight, 'z': d*2},
+                          'center': {'x': w*(tileWidth-1), 'y': (tileHeight*2.0*h)+tileHeight, 'z': d*(tileDepth-1)},
                           'extents': {'x': 1, 'y': 1, 'z': 1}
                       }
                   });
@@ -190,8 +190,8 @@ function AddFloor(floors, width, depth, center_height) {
           if (output[selectedFloorGuid] == null) {
               output[selectedFloorGuid] = [];
           }
-          //console.log(center_height);
-          output[selectedFloorGuid].push({'rotation': Math.floor(Math.random() * 3) * 4,
+          //console.log(center_height);  Math.floor(Math.random() * 3) * 4
+          output[selectedFloorGuid].push({'rotation': 1,
               'bounds':
               {
                   'center': {'x': w*2, 'y': center_height, 'z': d*2},
