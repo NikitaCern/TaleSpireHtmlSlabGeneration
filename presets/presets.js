@@ -1,32 +1,7 @@
 var presetAssets = {
     "mixed": {
-        "floors": {"3911d10d-142b-4f33-9fea-5d3a10c53781": 10, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
-        "randoms": [
-        {
-            "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
-            "defaultpercent": 40,
-        },
-        {
-            "nguid": "d5b7910a-ae06-4ad3-91f6-cbbd8782bbea",
-            "defaultpercent": 10,
-        },
-        {
-            "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
-            "defaultpercent": 10,
-        },
-        {
-            "nguid": "4741652b-2345-49a4-bed5-3a7fbae91b7e",
-            "defaultpercent": 10,
-        },
-        {
-            "nguid": "ed9bc853-bed5-443c-b45f-a7133d55011a",
-            "defaultpercent": 10,
-        },
-        {
-            "nguid": "ff966bc3-dd95-4ca9-a217-1ca16fce6b52",
-            "defaultpercent": 10,
-        }
-        ]
+        "floors": {"	bdf12fe7-8fa6-4474-878e-7e5847a34407": 100},
+        "randoms": []
     },
     "sparsepine": {
         "floors": {"3911d10d-142b-4f33-9fea-5d3a10c53781": 20, "01c3a210-94fb-449f-8c47-993eda3e7126": 100},
