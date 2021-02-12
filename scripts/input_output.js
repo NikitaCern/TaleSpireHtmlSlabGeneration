@@ -19,9 +19,6 @@ document.querySelector(".modal").addEventListener("click", function(e) {
 function sliderUpdate(element, output) {
   var slider = document.getElementById(element.id);
   document.getElementById(output).innerHTML = slider.value;
-  slider.oninput = function() {
-    document.getElementById(output).innerHTML = this.value;
-  }
 }
 
 //Function for showing messages on screen
@@ -70,20 +67,6 @@ function Generate() {
   clearPrintResults();
 
   slab = [];
-
-  width = document.getElementById("widthslider").value;
-  depth = document.getElementById("depthslider").value;
-  height = document.getElementById("heightslider").value;
-
-  elevation = new Array((width+1)*(depth+1));
-
-  scaleW = document.getElementById("noisewidthslider").value;
-  scaleD = document.getElementById("noisedepthslider").value;
-
-  offsetW = document.getElementById("Woffsetslider").value;
-  offsetD = document.getElementById("Doffsetslider").value;
-
-  seed = document.getElementById("seedslider").value;
 
   const groundsliders = document.querySelectorAll("input[groundnguid]"); //all ground tile sliders
   const sliderpercents = document.querySelectorAll("input[nguid]"); // all scatter sliders
@@ -141,7 +124,8 @@ function AddAssetToList(nguid, defaultpercent, custom = false) {
 
     var asset = TalespireSlabs.GetAsset(nguid);
 
-    sliderdiv.innerHTML = '<p class="sliderheader"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <strong><span id="' + nguid + 'percent"></span>%</strong> </p><input type="range" min="0" max="100" nguid="' + nguid + '" value="' + defaultpercent + '" class="sliderwide" id="' + nguid + 'slider">';
+    sliderdiv.innerHTML =
+    '<p class="sliderheader"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <strong><span id="' + nguid + 'percent"></span>%</strong> </p><input type="range" min="0" max="100" nguid="' + nguid + '" value="' + defaultpercent + '" class="sliderwide" id="' + nguid + 'slider">';
     document.getElementById("randomsliders").appendChild(sliderdiv);
 
     var randslider = document.getElementById(nguid + "slider");
@@ -199,10 +183,10 @@ function PopulateModalAssets() {
     '<span id="standardassets" style="display: block;"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table  width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
   var assets = TalespireSlabs.GetAllAssets();
 
-  tmpTable += '<tr><th>Name</th><th>GUID</th><th></th></tr>';
+  tmpTable += '<tr><th>Name</th><th></th><th>GUID</th><th></th></tr>';
 
   Object.entries(assets).forEach(function(asset) {
-    tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
+    tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td><strong> Size:' + Math.max(asset[1]["width"]-1, 0.5) +"x"+ Math.max(asset[1]["depth"]-1,0.5)+ '</strong></td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
       '\', 10);}" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
   });
   tmpTable += "</table></div></td></tr></table></span>";

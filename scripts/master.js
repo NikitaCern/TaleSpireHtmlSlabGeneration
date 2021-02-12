@@ -35,7 +35,6 @@ var heightArray;
 
 var elevation;
 
-
 /*
 var flag = false;
 

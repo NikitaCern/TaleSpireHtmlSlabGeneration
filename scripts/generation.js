@@ -4,8 +4,17 @@
 //Function uses perlin noise to generate a value at x,y coordinates
 function generateNoise(w,d){
   var noise = new Noise(seed);
-  var result = 1+noise.perlin2(w*scaleW/200.0,d*scaleD/200.0);
+
+  //var ow = offsetW*10.0/width;
+  //var od = offsetD*10.0/width;
+
+  var nw = w*0.01*scaleW;
+  var nd = d*0.01*scaleD;
+
+  var result = 0.5+noise.perlin2( (nw*1.0), (nd*1.0));
+
   result = Math.floor(height * result);
+
   return result;
 }
 
@@ -24,11 +33,27 @@ function setElevation(w,d,value){
   elevation[w*width+d] = value;
 }
 
+
 //Function generates a 2d array of elevation
 function generateElevation(){
-  for (var w = 0; w < width; w++) {
-    for (var d = 0; d < depth; d++) {
-      elevation[w*width+d] = generateNoise(w,d);
+
+  width = document.getElementById("widthslider").value;
+  depth = document.getElementById("depthslider").value;
+  height = document.getElementById("heightslider").value;
+
+  elevation = new Array((width)*(depth));
+
+  scaleW = document.getElementById("noisewidthslider").value;
+  scaleD = document.getElementById("noisedepthslider").value;
+
+  offsetW = document.getElementById("Woffsetslider").value;
+  offsetD = document.getElementById("Doffsetslider").value;
+
+  seed = document.getElementById("seedslider").value;
+
+  for (var w = 0; w <= width; w++) {
+    for (var d = 0; d <= depth; d++) {
+      setElevation(w,d,generateNoise(w,d));
     }
   }
 }
@@ -49,19 +74,21 @@ function GenerateTerrain(floor, center_height){
       var tileWidth = selectedFloor['width']-1.0;
       var tileDepth = selectedFloor['depth']-1.0;
 
-      groundTileDepth = tileDepth;
-      groundTileWidth = tileWidth;
+      if(groundTileDepth == null || groundTileWidth){
+        groundTileDepth = tileDepth;
+        groundTileWidth = tileWidth;
+      }
 
-      var height = getElevation(w,d);
-      setElevation(w,d, tileHeight*height);
+      var currentElevation = getElevation(w,d);
+      setElevation(w,d, tileHeight*(currentElevation-0.5));
 
-      for (var h = height - terrainThickness; h < height; h++) {
+      for (var h = currentElevation - terrainThickness; h < currentElevation; h++) {
         if (output[selectedFloorGuid] == null) {
           output[selectedFloorGuid] = [];
         }
         //console.log(center_height);
         output[selectedFloorGuid].push({
-          'rotation':Math.floor(getRandom()*3)*4,
+          'rotation':Math.floor(getRandom()*4)*4,
           'bounds': {
             'center': {
               'x': w*tileWidth,
@@ -138,27 +165,26 @@ function AddAsset(nguid, percentage) {
   //console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
   var asset = TalespireSlabs.GetAsset(nguid);
 
-  var tileHeight = asset['height'];
-  var tileWidth = asset['width'];
-  var tileDepth = asset['depth'];
 
-console.log(tileWidth);
+  var tileWidth = Math.max(asset['width']-1.0, 1.0);
+  var tileHeight = asset['height'];
+  var tileDepth = Math.max(asset['depth']-1.0, 1.0);
   var assets = [];
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
       if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
         assets.push({
-          'rotation': Math.floor(getRandom()*3)*4*0,
+          'rotation': Math.floor(getRandom()*4)*4 ,
           'bounds': {
             'center': {
-              'x': w*tileWidth,
-              'y': getElevation(w,d),
-              'z': d*tileDepth
+              'x': (w*tileWidth*groundTileWidth),
+              'y': (getElevation(w,d)*2),
+              'z': (d*tileDepth*groundTileDepth)
             },
             'extents': {
-              'x': tileWidth,
+              'x': tileWidth*0.5,
               'y': 1,
-              'z': tileDepth
+              'z': tileDepth*0.5
             }
           }
         });
@@ -203,7 +229,7 @@ function AddCustomAsset(customName ,percentage) {
     for (var d = 0; d < depth; d++) {
       var center_height = getElevation( w, d);
       if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
-      newRotation = Math.floor(getRandom() * 3) * 4
+      newRotation = Math.floor(getRandom() * 4) * 4*0;
       for (var a = 0; a < customAssetPayload.length; a++) {
         var assets = [];
         //var centerMin;
@@ -214,7 +240,7 @@ function AddCustomAsset(customName ,percentage) {
             'bounds': {
               'center': {
                 'x': (asset['bounds']['center']['x'] - centerMin[0]) + (w * 2),
-                'y': asset['bounds']['center']['y'] - asset['bounds']['extents']['y'] + center_height,
+                'y': asset['bounds']['center']['y'] - asset['bounds']['extents']['y'] + center_height+1,
                 'z': (asset['bounds']['center']['z'] - centerMin[2]) + d * 2
               },
               'extents': {

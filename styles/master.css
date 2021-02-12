@@ -6,6 +6,9 @@ body {
 *, *:before, *:after {
   box-sizing: border-box;
 }
+canvas{
+  border-style: solid;
+}
 
 .footer {
   float: left;

@@ -57,25 +57,25 @@
             <th><span class="sliderheader">Slab Height: <strong><span id="TerrainHeight"></span></strong></span></th>
           </tr>
           <tr>
-            <td><input type="range" min="1" max="50" value="3" class="slider" id="widthslider" onchange="sliderUpdate(this, 'TerrainWidth')"></td>
-            <td><input type="range" min="1" max="50" value="3" class="slider" id="depthslider" onchange="sliderUpdate(this, 'TerrainDepth')"></td>
-            <td><input type="range" min="1" max="20" value="5" class="slider" id="heightslider" onchange="sliderUpdate(this, 'TerrainHeight')"></td>
+            <td><input type="range" min="1" max="50" value="10" class="slider" id="widthslider" oninput="sliderUpdate(this, 'TerrainWidth')"></td>
+            <td><input type="range" min="1" max="50" value="10" class="slider" id="depthslider" oninput="sliderUpdate(this, 'TerrainDepth')"></td>
+            <td><input type="range" min="1" max="20" value="20" class="slider" id="heightslider" oninput="sliderUpdate(this, 'TerrainHeight')"></td>
           </tr>
           <tr>
             <th><span class="sliderheader">Noise W Scale: <strong><span id="noisescaleW"></span></strong></span></th>
             <th><span class="sliderheader">Noise D Scale: <strong><span id="noisescaleD"></span></strong></span></th>
           </tr>
           <tr>
-            <td><input type="range" min="1" max="100" value="50" class="slider" id="noisewidthslider" onchange="sliderUpdate(this, 'noisescaleW')"></td>
-            <td><input type="range" min="1" max="100" value="50" class="slider" id="noisedepthslider" onchange="sliderUpdate(this, 'noisescaleD')"></td>
+            <td><input type="range" min="1" max="10" value="5" class="slider" id="noisewidthslider" oninput="sliderUpdate(this, 'noisescaleW')"></td>
+            <td><input type="range" min="1" max="10" value="5" class="slider" id="noisedepthslider" oninput="sliderUpdate(this, 'noisescaleD')"></td>
           </tr>
           <tr>
             <th><span class="sliderheader">Noise W Offset: <strong><span id="noiseoffsetW"></span></strong></span></th>
             <th><span class="sliderheader">Noise D Offset: <strong><span id="noiseoffsetD"></span></strong></span></th>
           </tr>
           <tr>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="Woffsetslider" onchange="sliderUpdate(this, 'noiseoffsetW')"></td>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="Doffsetslider" onchange="sliderUpdate(this, 'noiseoffsetD')"></td>
+            <td><input type="range" min="1" max="50" value="25" class="slider" id="Woffsetslider" oninput="sliderUpdate(this, 'noiseoffsetW')"></td>
+            <td><input type="range" min="1" max="50" value="25" class="slider" id="Doffsetslider" oninput="sliderUpdate(this, 'noiseoffsetD')"></td>
           </tr>
           <tr>
             <th colspan="3"><span class="sliderheader">Seed: <strong><span id="seed"></span></strong></span></th>
@@ -110,6 +110,7 @@
       <div>
         <h3 style="margin-left: 40px">Decoded Results</h3>
         <p class="output" id="output"></p>
+        <canvas id="canvas" width="300" depth="300"></canvas>
       </div>
     </div>
   </form>
