@@ -77,13 +77,14 @@ function Generate() {
     floorvalues[item.getAttribute("groundnguid")] = item.value; // for each ground tile add it's percentage
   });
 
-  var terrain = GenerateTerrain(floorvalues, 1); // generate terrain
+  var terrain = GenerateTerrain(floorvalues); // generate terrain
 
   terrain.forEach(function(layer) {
       slab.push(layer);
   });
 
   GenerateScatter(sliderpercents);
+
   var results = TalespireSlabs.CreateSlab(slab);
   document.getElementById("forest").value = results;
   printResults(TalespireSlabs.DecodeSlab(results));
@@ -183,10 +184,10 @@ function PopulateModalAssets() {
     '<span id="standardassets" style="display: block;"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table  width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
   var assets = TalespireSlabs.GetAllAssets();
 
-  tmpTable += '<tr><th>Name</th><th></th><th>GUID</th><th></th></tr>';
+  tmpTable += '<tr><th>Name</th><th>Size</th><th>GUID</th><th></th></tr>';
 
   Object.entries(assets).forEach(function(asset) {
-    tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td><strong> Size:' + Math.max(asset[1]["width"]-1, 0.5) +"x"+ Math.max(asset[1]["depth"]-1,0.5)+ '</strong></td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
+    tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td><strong>' + asset[1]["Info"]["colliderBounds"][0]["m_Extent"]["x"]*2.0 +"x"+ asset[1]["Info"]["colliderBounds"][0]["m_Extent"]["z"]*2.0  + '</strong></td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
       '\', 10);}" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
   });
   tmpTable += "</table></div></td></tr></table></span>";

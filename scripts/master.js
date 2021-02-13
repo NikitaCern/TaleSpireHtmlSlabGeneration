@@ -28,84 +28,64 @@ var noiseDscale = 0;
 
 var noiseWoffset = 0;
 var noiseDoffset = 0;
-
-var terrainThickness = 2;
-
 var heightArray;
 
-var elevation;
+var elevation = new Elevation();
+var scaledElevation = new Elevation();
 
-/*
-var flag = false;
 
-function UpdateNoise(image){
-  var canvas = document.getElementsByTagName('canvas')[0];
-  var ctx = canvas.getContext('2d');
-  ctx.fillColor = 'white';
-  ctx.fillRect(0, 0, 100, 100);
-  ctx.mozImageSmoothingEnabled = false;
-ctx.imageSmoothingEnabled = false;
-  ctx.putImageData(image, 0, 0);
+function Elevation(){
+  this.elevation;
 
-  var newCanvas = document.createElement('canvas');
-  newCanvas.width = image.width;
-  newCanvas.height= image.height;
+  this.init = function(){
+        this.elevation = new Array((width)*(depth));
+  };
 
-  newCanvas.getContext("2d").putImageData(image, 0, 0);
-  if(!flag){
-    flag = true;
-    ctx.scale(5, 5);
-  }
-  ctx.drawImage(newCanvas, 0, 0);
+  this.getElevation = function(w,d){
+    var w_new = Math.max(Math.min(w,width-1),0);
+    var d_new = Math.max(Math.min(d,depth-1),0);
+    return this.elevation[w_new*width+d_new];
+  };
 
+  this.setElevation = function (w,d,value){
+    this.elevation[w*width+d] = value;
+  };
+
+  this.generateElevation = function(){
+
+    this.init();
+
+    width = document.getElementById("widthslider").value;
+    depth = document.getElementById("depthslider").value;
+    height = document.getElementById("heightslider").value;
+
+    scaleW = document.getElementById("noisewidthslider").value;
+    scaleD = document.getElementById("noisedepthslider").value;
+
+    offsetW = document.getElementById("Woffsetslider").value;
+    offsetD = document.getElementById("Doffsetslider").value;
+
+    seed = document.getElementById("seedslider").value;
+
+    for (var w = 0; w < width; w++) {
+      for (var d = 0; d < depth; d++) {
+        this.setElevation(w,d,generateNoise(w,d));
+      }
+    }
+  };
 }
 
-function updateImage(){
 
-    var width = document.getElementById("widthslider").value;
-    var depth = document.getElementById("depthslider").value;
-    var height = document.getElementById("heightslider").value;
-
-    var noiseWscale = document.getElementById("noisewidthslider").value;
-    var noiseDscale = document.getElementById("noisedepthslider").value;
-
-    var noiseWoffset = document.getElementById("Woffsetslider").value;
-    var noiseDoffset = document.getElementById("Doffsetslider").value;
-
-    noiseWoffset *= 4;
-    noiseDoffset *= 4;
-
-    var seed = document.getElementById("seedslider").value;
-
-    const groundsliders = document.querySelectorAll("input[groundnguid]");
-    var floorvalues = {};
-    groundsliders.forEach(function(percent) {
-        floorvalues[percent.getAttribute("groundnguid")] = percent.value;``
-    });
-    //var floorData = AddFloor(floorvalues, width, depth, 1);
-    var image = imageCreation(width, depth, height, seed, noiseWscale , noiseDscale,noiseWoffset, noiseDoffset);
-
-    return image;
-}
-
-function imageCreation( width, depth, height, seed, scaleW, scaleD, offsetW, offsetD){
+//Function uses perlin noise to generate a value at x,y coordinates
+function generateNoise(w,d){
   var noise = new Noise(seed);
 
-  var canvas = document.getElementsByTagName('canvas')[0];
-  var ctx = canvas.getContext('2d');
+  var nw = w*0.01*scaleW;
+  var nd = d*0.01*scaleD;
 
-  var image =  ctx.createImageData(Number(width), Number(depth));
-  var data = image.data;
+  var result = 0.5+noise.perlin2( (nw*1.0), (nd*1.0));
 
-  for (var w = 0; w < width; w++) {
-      for (var d = 0; d < depth; d++) {
-        var noiseValue = Math.floor(height*(1+noise.perlin2( (w/scaleW)+(offsetW/scaleW) , (d/scaleD)+(offsetD/scaleD) )));
+  result = Math.floor(height * result);
 
-        var cell = (d+w*width)*4;
-        data[cell] = data[cell + 1] = data[cell + 2] = 256-noiseValue*(256/height);
-        data[cell + 3] = 255; // alpha.
-      }
-  }
-  return UpdateNoise(image);
+  return result;
 }
-*/

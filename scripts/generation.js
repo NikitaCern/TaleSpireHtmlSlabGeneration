@@ -1,66 +1,38 @@
 // This file conains all the functions that pretend to the generation of terrain and addition of scatered objects onto it
 
 
-//Function uses perlin noise to generate a value at x,y coordinates
-function generateNoise(w,d){
-  var noise = new Noise(seed);
-
-  //var ow = offsetW*10.0/width;
-  //var od = offsetD*10.0/width;
-
-  var nw = w*0.01*scaleW;
-  var nd = d*0.01*scaleD;
-
-  var result = 0.5+noise.perlin2( (nw*1.0), (nd*1.0));
-
-  result = Math.floor(height * result);
-
-  return result;
-}
-
 //Seeded random function
 function getRandom(){
   return Math.random(seed);
 }
 
-//Function returns the elevation at point x,y
-function getElevation(w,d){
-  return elevation[w*width+d];
-}
 
-//Function sets the elevation value at point x,y
-function setElevation(w,d,value){
-  elevation[w*width+d] = value;
-}
+//Function returns the right thickness for a specific point in the terrainThickness
+function adaptiveThickness(w,d){
+  var x = elevation.getElevation(w,d);
+  var w0 = elevation.getElevation(w-1,d)-x;
+  var w1 = elevation.getElevation(w+1,d)-x;
+  var d0 = elevation.getElevation(w,d-1)-x;
+  var d1 = elevation.getElevation(w,d+1)-x;
 
+  var deltaW = Math.abs(Math.min(w0, w1));
+  var deltaD = Math.abs(Math.min(d0, d1));
 
-//Function generates a 2d array of elevation
-function generateElevation(){
+  console.log(x, w0+x, w1+x, d0+x, d1+x)
+  var delta = Math.ceil(Math.max(deltaW, deltaD));
 
-  width = document.getElementById("widthslider").value;
-  depth = document.getElementById("depthslider").value;
-  height = document.getElementById("heightslider").value;
-
-  elevation = new Array((width)*(depth));
-
-  scaleW = document.getElementById("noisewidthslider").value;
-  scaleD = document.getElementById("noisedepthslider").value;
-
-  offsetW = document.getElementById("Woffsetslider").value;
-  offsetD = document.getElementById("Doffsetslider").value;
-
-  seed = document.getElementById("seedslider").value;
-
-  for (var w = 0; w <= width; w++) {
-    for (var d = 0; d <= depth; d++) {
-      setElevation(w,d,generateNoise(w,d));
-    }
+  if(delta > 0){
+    console.log(delta);
+    return delta+1;
   }
+  return 1;
 }
+
 
 //Function generates terrain with a perlin noise map
-function GenerateTerrain(floor, center_height){
-  generateElevation();
+function GenerateTerrain(floor){
+  elevation.generateElevation();
+  scaledElevation.generateElevation();
 
   var output = {};
   var heightArray = [];
@@ -70,35 +42,40 @@ function GenerateTerrain(floor, center_height){
       var selectedFloorGuid = GetWeightedValue(floor);
       var selectedFloor = TalespireSlabs.GetAsset(selectedFloorGuid);
 
-      var tileHeight = selectedFloor['height'];
-      var tileWidth = selectedFloor['width']-1.0;
-      var tileDepth = selectedFloor['depth']-1.0;
+      var centerHeight = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["y"];
+      var centerWidth = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["x"];
+      var centerDepth = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["z"];
 
-      if(groundTileDepth == null || groundTileWidth){
-        groundTileDepth = tileDepth;
-        groundTileWidth = tileWidth;
-      }
+      var extentHeight =  selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["y"];
+      var extentWidth = selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["x"];
+      var extentDepth = selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["z"];
 
-      var currentElevation = getElevation(w,d);
-      setElevation(w,d, tileHeight*(currentElevation-0.5));
+      var rotation = Math.floor(getRandom()*3)*4;
 
-      for (var h = currentElevation - terrainThickness; h < currentElevation; h++) {
+      groundTileDepth = extentDepth*2.0;
+      groundTileWidth = extentWidth*2.0;
+
+      var currentElevation = elevation.getElevation(w,d);
+      var thickness = adaptiveThickness(w,d);
+
+      scaledElevation.setElevation(w,d, currentElevation*extentHeight*2.0-extentHeight);
+
+      for (var h = currentElevation - thickness; h < currentElevation; h++) {
         if (output[selectedFloorGuid] == null) {
           output[selectedFloorGuid] = [];
         }
-        //console.log(center_height);
         output[selectedFloorGuid].push({
-          'rotation':Math.floor(getRandom()*4)*4,
+          'rotation':rotation,
           'bounds': {
             'center': {
-              'x': w*tileWidth,
-              'y': (tileHeight * h * 2.0) ,
-              'z': d*tileDepth
+              'x': w*centerWidth*2.0+extentWidth,
+              'y': h*centerHeight*2.0,
+              'z': d*centerDepth*2.0+extentDepth
             },
             'extents': {
-              'x': tileWidth*0.5,
-              'y': tileHeight,
-              'z': tileDepth*0.5
+              'x': extentWidth,
+              'y': extentHeight,
+              'z': extentDepth
             }
           }
         });
@@ -137,13 +114,11 @@ function GenerateScatter(sliderpercents) {
             }
           }
           if (!found) {
-            console.log("!found",customAssetData[i]);
             slab.push(customAssetData[i]);
           }
         }
       } else {
         var x = AddAsset(percent.getAttribute("nguid"), percent.value);
-        console.log("!custom",x)
         slab.push(x); // 1.38
       }
     });
@@ -162,29 +137,45 @@ function GetWeightedValue(weightedDict) {
 
 //Functon for adding simple scatter objects ontop of terrain
 function AddAsset(nguid, percentage) {
-  //console.log("Adding asset: " + nguid + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
+
+  var assets = [];
+
   var asset = TalespireSlabs.GetAsset(nguid);
 
+  var centerHeight = asset["Info"]["colliderBounds"][0]["m_Center"]["y"];
+  var centerWidth = asset["Info"]["colliderBounds"][0]["m_Center"]["x"];
+  var centerDepth = asset["Info"]["colliderBounds"][0]["m_Center"]["z"];
 
-  var tileWidth = Math.max(asset['width']-1.0, 1.0);
-  var tileHeight = asset['height'];
-  var tileDepth = Math.max(asset['depth']-1.0, 1.0);
-  var assets = [];
-  for (var w = 0; w < width; w++) {
-    for (var d = 0; d < depth; d++) {
+  var extentHeight =  asset["Info"]["colliderBounds"][0]["m_Extent"]["y"];
+  var extentWidth = asset["Info"]["colliderBounds"][0]["m_Extent"]["x"];
+  var extentDepth = asset["Info"]["colliderBounds"][0]["m_Extent"]["z"];
+
+
+  var scalingFactorW = groundTileWidth/(extentWidth*2.0);
+  var scalingFactorD = groundTileDepth/(extentDepth*2.0);
+
+  for (var w = 0; w < width*scalingFactorW; w++) {
+    for (var d = 0; d < depth*scalingFactorD; d++) {
+
+      var rotation = Math.floor(getRandom()*3)*4;
+      var scaledWidth = Math.floor(w/scalingFactorW);
+      var scaledDepth = Math.floor(d/scalingFactorD);
+
+      var h = scaledElevation.getElevation(scaledWidth,scaledDepth);
+
       if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
         assets.push({
-          'rotation': Math.floor(getRandom()*4)*4 ,
+          'rotation': rotation,
           'bounds': {
             'center': {
-              'x': (w*tileWidth*groundTileWidth),
-              'y': (getElevation(w,d)*2),
-              'z': (d*tileDepth*groundTileDepth)
+              'x': w*centerWidth*2.0+extentWidth,
+              'y': h+extentHeight ,
+              'z': d*centerDepth*2.0+extentDepth
             },
             'extents': {
-              'x': tileWidth*0.5,
-              'y': 1,
-              'z': tileDepth*0.5
+              'x': extentWidth,
+              'y': extentHeight,
+              'z': extentDepth
             }
           }
         });
@@ -199,8 +190,8 @@ function AddAsset(nguid, percentage) {
 
 //Functon for adding custom scatter objects ontop of terrain
 function AddCustomAsset(customName ,percentage) {
-  //console.log("Adding custom asset: " + customName + " Width: " + width + " Depth: " + depth + " Percentage: " + percentage);
   var customAssetPayload;
+
   if (customName.startsWith('builtin')) {
     customAssetPayload = TalespireSlabs.DecodeSlabToPayload(builtInCustoms[customName]);
   } else {
@@ -209,50 +200,60 @@ function AddCustomAsset(customName ,percentage) {
 
   var assetPayload = [];
   var centerMin = [0, 0, 0];
+
   for (var a = 0; a < customAssetPayload.length; a++) {
-    if (a > 0) {
-      break;
-    }
+
     for (var x = 0; x < customAssetPayload[a]['assets'].length; x++) {
+
       var asset = customAssetPayload[a]['assets'][x];
-      if (a == 0 && x == 0) {
-        centerMin = [asset['bounds']['center']['x'], asset['bounds']['center']['y'], asset['bounds']['center']['z']]
-      }
       if (a == 0) {
-        centerMin[0] = Math.min(asset['bounds']['center']['x'], centerMin[0]);
-        centerMin[1] = Math.min(asset['bounds']['center']['y'], centerMin[1]);
-        centerMin[2] = Math.min(asset['bounds']['center']['z'], centerMin[2]);
+        if (x == 0) {
+          centerMin = [Math.abs(asset['bounds']['center']['x']), Math.abs(asset['bounds']['center']['y']), Math.abs(asset['bounds']['center']['z'])];
+        }
+        centerMin[0] = Math.max(Math.abs(asset['bounds']['center']['x']), centerMin[0]);
+        centerMin[1] = Math.max(Math.abs(asset['bounds']['center']['y']), centerMin[1]);
+        centerMin[2] = Math.max(Math.abs(asset['bounds']['center']['z']), centerMin[2]);
       }
     }
   }
+
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
-      var center_height = getElevation( w, d);
+
+
+      var centerHeight = scaledElevation.getElevation( w, d);
+
       if ((Math.floor(getRandom() * 100) + 1) <= percentage) {
-      newRotation = Math.floor(getRandom() * 4) * 4*0;
+
+      newRotation = Math.floor(getRandom() * 3) * 4*0;
+
       for (var a = 0; a < customAssetPayload.length; a++) {
+
         var assets = [];
-        //var centerMin;
+
+                  console.log(customAssetPayload[a]);
+
         for (var x = 0; x < customAssetPayload[a]['assets'].length; x++) {
+
           var asset = customAssetPayload[a]['assets'][x];
+
+
           assets.push({
             'rotation': newRotation + asset['rotation'],
             'bounds': {
               'center': {
-                'x': (asset['bounds']['center']['x'] - centerMin[0]) + (w * 2),
-                'y': asset['bounds']['center']['y'] - asset['bounds']['extents']['y'] + center_height+1,
-                'z': (asset['bounds']['center']['z'] - centerMin[2]) + d * 2
+                'x': w* groundTileWidth + (asset['bounds']['center']['x']+centerMin[0])+asset['bounds']['extents']['x'],
+                'y': centerHeight +asset['bounds']['center']['y'],
+                'z': d* groundTileDepth + (asset['bounds']['center']['z']+centerMin[2]+asset['bounds']['extents']['z'])
               },
               'extents': {
                 'x': asset['bounds']['extents']['x'],
-                'y': 1,
+                'y': asset['bounds']['extents']['y'],
                 'z': asset['bounds']['extents']['z']
               }
             }
           });
         }
-        console.log("guid: " + customAssetPayload[a]['nguid'] + " Asset Count: " + assets.length);
-
         assetPayload.push({
           'nguid': customAssetPayload[a]['nguid'],
           'assets': assets
