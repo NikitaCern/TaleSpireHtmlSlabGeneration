@@ -20,21 +20,15 @@ for root,d_names,f_names in os.walk(path):
             nguid = asset["GUID"]
             asset_name = asset["boardAssetName"]
             board_asset_group = asset["boardAssetGroup"]
-            width = 0
-            depth = 0
-            for tag in asset["Tags"]:
-                if "X" in tag:
-                    try:
-                        width = int(tag[:tag.index("X")])
-                        depth = int(tag[tag.index("X"):])
-                    except ValueError:
-                        print("Invalid tag with X")
-                        pass
-            height = asset["colliderBounds"][0]["m_Extent"]["y"]
-            if width == 0:
-                width = asset["assetLoaders"][0]["occluderInfo"]["Width"]
-            if depth == 0:
-                depth = asset["assetLoaders"][0]["occluderInfo"]["Depth"]
-            output[nguid] = {"name": asset_name, "group": board_asset_group, "width": width, "height": height, "depth": depth}
+            e_height = asset["colliderBounds"][0]["m_Extent"]["y"]
+            e_width = asset["colliderBounds"][0]["m_Extent"]["x"]
+            e_depth = asset["colliderBounds"][0]["m_Extent"]["z"]
+            c_height = asset["colliderBounds"][0]["m_Center"]["y"]
+            c_width = asset["colliderBounds"][0]["m_Center"]["x"]
+            c_depth = asset["colliderBounds"][0]["m_Center"]["z"]
+            extents = {"width": e_width, "height": e_height, "depth": e_depth}
+            center = {"width": c_width, "height": c_height, "depth": c_depth}
+            output[nguid] = {"name": asset_name, "group": board_asset_group, "extents": extents, "center":center }
 with open("scripts/assetdata.js", "w") as fout:
     fout.write("asset_data = " + json.dumps(output) + ";")
+print("ALL Done!")
