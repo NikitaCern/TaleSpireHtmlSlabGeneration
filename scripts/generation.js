@@ -18,7 +18,6 @@ function adaptiveThickness(w,d){
   var deltaW = Math.abs(Math.min(w0, w1));
   var deltaD = Math.abs(Math.min(d0, d1));
 
-  console.log(x, w0+x, w1+x, d0+x, d1+x)
   var delta = Math.ceil(Math.max(deltaW, deltaD));
 
   if(delta > 0){
@@ -31,8 +30,6 @@ function adaptiveThickness(w,d){
 
 //Function generates terrain with a perlin noise map
 function GenerateTerrain(floor){
-  elevation.generateElevation();
-  scaledElevation.generateElevation();
 
   var output = {};
   var heightArray = [];
@@ -230,8 +227,6 @@ function AddCustomAsset(customName ,percentage) {
       for (var a = 0; a < customAssetPayload.length; a++) {
 
         var assets = [];
-
-                  console.log(customAssetPayload[a]);
 
         for (var x = 0; x < customAssetPayload[a]['assets'].length; x++) {
 

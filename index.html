@@ -1,122 +1,184 @@
-<html>
+<html lang = "en">
 
 <head>
   <title>Terrain Generator</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="styles/bootstrap.min.css">
   <link rel="stylesheet" href="styles/master.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
-
 <body>
-  <span style="margin: 10px;font-size: 120%; float: right"><a href="https://github.com/NikitaCern/TaleSpireHtmlSlabGeneration"><i class="fa fa-github"></i> Github Project</a></span>
-  <h1 style="padding-left: 20px; padding-top: 20px">Terrain Generator</h1>
-
-  <form onSubmit="return false;">
-    <textarea style="margin: 10px; height: 200px; width: 850px; resize: vertical;" id="forest"></textarea>
-
-    <div style="width: 850px; margin: 10px;" class="btn-group">
-      <button id="button" onclick="Generate();">GenerateTerrain <span class="tooltip"><i class="fa fa-question-circle"></i>
-          <span class="tooltiptext">Clicking this button will take the values from slab size and randomness below and create a slab that can be pasted in to TaleSpire.</span>
-        </span></button>
-      <button class="clipboardbutton" id="button" onclick="CopyToClipboard();">Copy To Clipboard <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">This button copies the contents of the above into your
-            clipboard.</span></button>
-      <button class="clipboardbutton" id="button" onclick="ShowSaveDialog();">Save Custom Slab <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">After pasting a slab you can store it as a custom asset that can be
-            used later to insert as a random asset.</span></button>
-      <button style="float: right; " id="button" onclick='ReadSlab();'>Read Pasted Slab <span class="tooltip"><i class="fa fa-question-circle"></i><span class="tooltiptext">Reads the value that has been pasted (from TaleSpire) and prints out the
-            associated data in the Decoded Results.</span></button>
+<div class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <h3>Terrain Generator
+        <small class="text-muted"> for Talespire</small>
+      </h3>
+      <div class="f-r">
+        <a href="https://github.com/NikitaCern/TaleSpireHtmlSlabGeneration">GitHub</a>
+        <i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i>
+      </div>
     </div>
+  </div>
+  <div id="snackbar"></div>
+<div class="row m-5">
+
     <div id="SlabNameDialog" class="modal">
-      <div style="width: 330px; height: 220px" class="modal-content">
+      <div class="modal-content">
         <div class="modal-body">
-          <p style="font-size: 80%">Custom Slab Name</p>
-          <input style="font-size: 90%" type="text" id="slabname" placeholder="Enter Name">
-          <div style="width: 280px; margin: 10px; text-align: right" class="btn-group">
-            <button onClick='document.getElementById("SlabNameDialog").style.display = "none";SaveToLocal();'><i class="fa fa-check"> OK</i></button>
-            <button onClick='document.getElementById("SlabNameDialog").style.display = "none";'><i class="fa fa-times"> Cancel</i></button>
-          </div>
+        <p>Custom Slab Name</p>
+        <input type="text" id="slabname" placeholder="Enter Name">
+        <div class="btn-group">
+          <button onClick='document.getElementById("SlabNameDialog").style.display = "none";SaveToLocal();'><i class="fa fa-check"> OK</i></button>
+          <button onClick='document.getElementById("SlabNameDialog").style.display = "none";'><i class="fa fa-times"> Cancel</i></button>
+        </div>
         </div>
       </div>
     </div>
-    <span style="clear: both"></span>
-    <div class="row">
-      <div class="column">
 
-        <div style="padding-top: 25px; float: right"><label>Presets
-            <select id="presets" onchange="PopulateAssetList(presetAssets[this.value]);">
+
+  <div class="row align-items-start w-100">
+    <div class="col">
+      <div class="form-group">
+        <form>
+          <fieldset>
+            <h2>Parameters:</h2>
+            <fieldset class="form-group">
+              <label for="Wslider">Width: </label>
+              <span id="W"></span>
+              <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Wslider" oninput="sliderUpdate(this, 'W')">
+            </fieldset>
+            <fieldset class="form-group">
+              <label for="Dslider">Depth: </label>
+              <span id="D"></span>
+              <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Dslider" oninput="sliderUpdate(this, 'D')">
+            </fieldset>
+            <fieldset class="form-group">
+              <label for="Hslider">Height: </label>
+              <span id="H"></span>
+              <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Hslider" oninput="sliderUpdate(this, 'H')">
+            </fieldset>
+          </fieldset>
+          <fieldset>
+            <legend>Noise options:</legend>
+            <fieldset class="form-group">
+              <label for="nsWslider">Noise W Scale: </label>
+              <span id="nsW"></span>
+              <input type="range" class="custom-range" min="1" max="10" value="5" step="0.1" id="nsWslider" oninput="sliderUpdate(this, 'nsW')">
+            </fieldset>
+            <fieldset class="form-group">
+              <label for="nsDslider">Noise D Scale: </label>
+              <span id="nsD"></span>
+              <input type="range" class="custom-range" min="1" max="10" value="5" step="0.1" id="nsDslider" oninput="sliderUpdate(this, 'nsD')">
+            </fieldset>
+            <fieldset class="form-group">
+              <label for="noWslider">Noise W Offset: </label>
+              <span id="noW"></span>
+              <input type="range" class="custom-range" min="1" max="100" value="50" step="1" id="noWslider" oninput="sliderUpdate(this, 'noW')">
+            </fieldset>
+            <fieldset class="form-group">
+              <label for="noDslider">Noise D Offset: </label>
+              <span id="noD"></span>
+              <input type="range" class="custom-range" min="1" max="100" value="50" step="1" id="noDslider" oninput="sliderUpdate(this, 'noD')">
+            </fieldset>
+
+            <fieldset class="form-group">
+              <label for="Sslider">Seed: </label>
+              <span id="S"></span>
+              <input type="range" class="custom-range" min="1" max="1000" value="500" step="1" id="Sslider" oninput="sliderUpdate(this, 'S')">
+            </fieldset>
+
+          </fieldset>
+        </form>
+        <div class="bs-components">
+          <button type="button" class="btn btn-success w-100" onclick="Generate();"> GenerateTerrain</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-lg-6">
+      <div class="form-group w-100">
+        <div class="row">
+          <div class="col-auto mr-auto">
+            <h2>Preset:</h2>
+          </div>
+          <div class="col">
+            <select class="form-control" id="presets" onchange="PopulateAssetList(presetAssets[this.value]);">
               <option value="mixed" selected="selected">Mixed Forest</option>
               <option value="sparsepine">Sparse Pine Forest</option>
               <option value="heavypine">Heavy Pine Forest</option>
               <option value="sparsedead">Sparse Dead Forest</option>
               <option value="heavydead">Heavy Dead Forest</option>
-            </select></div>
-        <h3>Slab Size</h3>
-        <table>
-          <tr>
-            <th><span class="sliderheader">Slab Width: <strong><span id="TerrainWidth"></span></strong></span></th>
-            <th><span class="sliderheader">Slab Depth: <strong><span id="TerrainDepth"></span></strong></span></th>
-            <th><span class="sliderheader">Slab Height: <strong><span id="TerrainHeight"></span></strong></span></th>
-          </tr>
-          <tr>
-            <td><input type="range" min="1" max="50" value="5" class="slider" id="widthslider" oninput="sliderUpdate(this, 'TerrainWidth')"></td>
-            <td><input type="range" min="1" max="50" value="5" class="slider" id="depthslider" oninput="sliderUpdate(this, 'TerrainDepth')"></td>
-            <td><input type="range" min="1" max="20" value="5" class="slider" id="heightslider" oninput="sliderUpdate(this, 'TerrainHeight')"></td>
-          </tr>
-          <tr>
-            <th><span class="sliderheader">Noise W Scale: <strong><span id="noisescaleW"></span></strong></span></th>
-            <th><span class="sliderheader">Noise D Scale: <strong><span id="noisescaleD"></span></strong></span></th>
-          </tr>
-          <tr>
-            <td><input type="range" min="1" max="10" value="5" class="slider" id="noisewidthslider" oninput="sliderUpdate(this, 'noisescaleW')"></td>
-            <td><input type="range" min="1" max="10" value="5" class="slider" id="noisedepthslider" oninput="sliderUpdate(this, 'noisescaleD')"></td>
-          </tr>
-          <tr>
-            <th><span class="sliderheader">Noise W Offset: <strong><span id="noiseoffsetW"></span></strong></span></th>
-            <th><span class="sliderheader">Noise D Offset: <strong><span id="noiseoffsetD"></span></strong></span></th>
-          </tr>
-          <tr>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="Woffsetslider" oninput="sliderUpdate(this, 'noiseoffsetW')"></td>
-            <td><input type="range" min="1" max="50" value="25" class="slider" id="Doffsetslider" oninput="sliderUpdate(this, 'noiseoffsetD')"></td>
-          </tr>
-          <tr>
-            <th colspan="3"><span class="sliderheader">Seed: <strong><span id="seed"></span></strong></span></th>
-          </tr>
-          <tr>
-            <td colspan="3"><input type="range" min="1" max="1000" value="500" class="slider" id="seedslider" onchange="sliderUpdate(this, 'seed')"></td>
-          </tr>
-        </table>
-        <p><button onClick='ShowAssetWindow(true);' class="addbtn"><i class="fa fa-plus"> Add Ground</i></button></p>
-        <h3 style='margin-top: 40px;'>Ground</h3>
+            </select>
+          </div>
+        </div>
+
+
+      </div>
+      <div class="row align-items-start">
+      <div class="col">
+        <div class="row">
+          <div class="col-auto mr-auto">
+            <h3>Ground</h3>
+          </div>
+          <div class="col-auto">
+            <button onClick='ShowAssetWindow(true);' class="addbtn btn btn-success"><i class="fa fa-plus"></i> Add Ground</button>
+          </div>
+        </div>
         <span id="groundsliders"></span>
-        <br>
-        <span style="clear: both"></span>
-        <br>
-        <button onClick='ShowAssetWindow(false);' class="addbtn"><i class="fa fa-plus"> Add Asset</i></button>
-        <h3>Randomness</h3>
+      </div>
+
+      <div class="col">
+        <div class="row">
+          <div class="col-auto mr-auto">
+              <h3>Objects</h3>
+          </div>
+          <div class="col-auto">
+            <button onClick='ShowAssetWindow(false);' class="addbtn btn btn-success"><i class="fa fa-plus"></i> Add Asset</button>
+          </div>
+        </div>
         <span id="randomsliders"></span>
         <div id="AssetSelect" class="modal">
-          <!-- Modal content -->
           <div class="modal-content">
             <div class="modal-body">
               <div onclick='AssetSelect.style.display = "none";' class="modalClose"><i class="fa fa-close"></i></div>
-              <h3 style="margin-top: -25px">Asset Selection</h3>
-              <input type="text" id="assetSearch" onkeyup="searchAssets()" style="font-size: 100%;font-family:Candara, Calibri, Segoe, FontAwesome" placeholder="&#xf002; Search"><label id="swapassets"><input onclick="ShowCustomAssets()"
-                  style="margin-left: 20px;" type="checkbox" id="custom"><span style="font-size: 80%;">Show Custom Assets</span></label>
-              <div style="width: 812px;" id="assetTable"></div>
+
+              <h3 >Asset Selection</h3>
+
+              <input type="text" id="assetSearch" onkeyup="searchAssets()" placeholder="&#xf002; Search">
+              <label id="swapassets">
+                <input onclick="ShowCustomAssets()" type="checkbox" id="custom">
+                <span>Show Custom Assets</span>
+              </label>
+
+              <div id="assetTable"></div>
+
               <div onclick='AssetSelect.style.display = "none";' class="modalOk"><i class="fa fa-check-square"></i> Done</div>
             </div>
           </div>
         </div>
       </div>
-      <div>
-        <h3 style="margin-left: 40px">Decoded Results</h3>
-        <p class="output" id="output"></p>
-        <canvas id="canvas" width="300" depth="300"></canvas>
-      </div>
     </div>
-  </form>
-  <span style="float: none"></span>
-  <div id="snackbar"></div>
+    </div>
 
+
+  <div class="col">
+  <div class="container-fluid" id="canvasContainer">
+    <canvas id="canvas" class="mb-3 w-100"></canvas>
+    <div id="output" style="display:none"></div>
+    <div class="btn-group w-100">
+      <button type="button" class="btn btn-success" onclick="CopyToClipboard();">Copy To Clipboard</button>
+      <button type="button" class="btn btn-success" onclick="ShowSaveDialog();">Save Custom Slab</button>
+      <button type="button" class="btn btn-success"  onclick='ReadSlab();'>Read Pasted Slab</button>
+    </div>
+    <textarea id="forest" class="form-control h-auto"></textarea>
+  </div>
+</div>
+
+  </div>
+</div>
   <script src="presets/customs.js"></script>
   <script src="presets/presets.js"></script>
 
@@ -127,9 +189,10 @@
 
   <script src="scripts/master.js"></script>
 
-  <div class="footer"><i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i>
-    <br>D20ArmyKnife © 2020
-  </div>
+
+
+
+
 </body>
 
 </html>
