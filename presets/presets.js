@@ -14,7 +14,12 @@ var presetAssets = {
       "3911d10d-142b-4f33-9fea-5d3a10c53781": 20,
       "01c3a210-94fb-449f-8c47-993eda3e7126": 100
     },
-    "randoms": [{
+    "randoms": [
+      {
+        "nguid": "builtin-Standard Stacked Pine",
+        "defaultpercent": 10,
+      },
+      {
         "nguid": "fee2bce5-fc53-4eab-bcba-0d7a73e84b49",
         "defaultpercent": 40,
       },
@@ -22,10 +27,7 @@ var presetAssets = {
         "nguid": "b557beec-e795-4a65-99c4-0bbb0827077d",
         "defaultpercent": 10,
       },
-      {
-        "nguid": "builtin-Standard Stacked Pine",
-        "defaultpercent": 10,
-      },
+
       {
         "nguid": "builtin-Short Stacked Pine",
         "defaultpercent": 10,

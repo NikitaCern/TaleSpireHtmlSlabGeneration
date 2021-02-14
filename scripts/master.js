@@ -37,6 +37,8 @@ var noise;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+updateCanvas();
+
 function float2color( percentage ) {
     var color_part_dec = 255 * percentage;
     var color_part_hex = Number(parseInt( color_part_dec , 10)).toString(16);
@@ -56,14 +58,11 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
       var x0 = w*smallestDist;
       var y0 = d*smallestDist;
       ctx.fillStyle = hexColor;
-      ctx.bor
       ctx.fillRect(x0,y0,smallestDist,smallestDist);
       //console.log(w,d,hexColor);
     }
   }
 }
-
-
 
 function Elevation(){
   this.elevation;
@@ -73,6 +72,7 @@ function Elevation(){
       for (var i = 0; i < width; i++) {
         this.elevation[i] = new Array(depth);
       }
+
   };
 
   this.getElevation = function(w,d){
@@ -109,16 +109,16 @@ function Elevation(){
   };
 }
 
-
 //Function uses perlin noise to generate a value at x,y coordinates
 function generateNoise(w,d){
   if(w==0 && d==0){
     noise = new Noise(seed);
   }
-  var nw = w*scaleW*0.01;
-  var nd = d*scaleD*0.01;
+  var nw = ((w-offsetW)/width-1)*0.5;
+  var nd = ((d-offsetD)/depth-1)*0.5;
 
-  var result = 0.5*(1.0+noise.perlin2( (nw), (nd)));
+
+  var result = 0.5*(1.0+noise.perlin2( nw*scaleW, nd*scaleD));
   result = Math.floor(result*height);
 
   return result;

@@ -21,7 +21,6 @@ function adaptiveThickness(w,d){
   var delta = Math.ceil(Math.max(deltaW, deltaD));
 
   if(delta > 0){
-    console.log(delta);
     return delta+1;
   }
   return 1;
@@ -29,14 +28,15 @@ function adaptiveThickness(w,d){
 
 
 //Function generates terrain with a perlin noise map
-function GenerateTerrain(floor){
+function GenerateTerrain(floorAssets){
 
   var output = {};
   var heightArray = [];
 
   for (var w = 0; w < width; w++) {
     for (var d = 0; d < depth; d++) {
-      var selectedFloorGuid = GetWeightedValue(floor);
+
+      var selectedFloorGuid = GetWeightedValue(floorAssets);
       var selectedFloor = TalespireSlabs.GetAsset(selectedFloorGuid);
 
       var centerHeight = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["y"];
@@ -90,12 +90,15 @@ function GenerateTerrain(floor){
 }
 
 //Function that generates scatter objects ontop of the terrain
-function GenerateScatter(sliderpercents) {
+function GenerateScatter(scatterAssets) {
 
-  sliderpercents.forEach(function(percent) {
+  Object.entries(scatterAssets).forEach(function(asset) {
 
-      if (percent.getAttribute("custom")) {
-        var customAssetData = AddCustomAsset(percent.getAttribute("nguid"), percent.value);
+      var custom = asset[1][0].getAttribute("custom");
+      var nguid = asset[0];
+      var value = asset[1][0].value;
+      if (custom == "true") {
+        var customAssetData = AddCustomAsset(nguid,value);
 
         for (var i = 0; i < customAssetData.length; i++) {
           var found = false;
@@ -115,7 +118,8 @@ function GenerateScatter(sliderpercents) {
           }
         }
       } else {
-        var x = AddAsset(percent.getAttribute("nguid"), percent.value);
+        console.log("normal!");
+        var x = AddAsset(nguid, value);
         slab.push(x); // 1.38
       }
     });
@@ -137,7 +141,11 @@ function AddAsset(nguid, percentage) {
 
   var assets = [];
 
+    console.log(nguid);
+
   var asset = TalespireSlabs.GetAsset(nguid);
+
+  console.log(asset);
 
   var centerHeight = asset["Info"]["colliderBounds"][0]["m_Center"]["y"];
   var centerWidth = asset["Info"]["colliderBounds"][0]["m_Center"]["x"];
@@ -166,7 +174,7 @@ function AddAsset(nguid, percentage) {
           'bounds': {
             'center': {
               'x': w*centerWidth*2.0+extentWidth,
-              'y': h+extentHeight ,
+              'y': h+extentHeight,
               'z': d*centerDepth*2.0+extentDepth
             },
             'extents': {

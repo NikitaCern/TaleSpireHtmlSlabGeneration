@@ -26,25 +26,16 @@ function sliderUpdate(element, output) {
 
 //Function for showing messages on screen
 function ShowMessage(message, color = "black", timeout = 3000) {
+  return;
   var x = document.getElementById("snackbar");
   x.innerHTML = message;
   x.style.backgroundColor = color;
-  x.className = "show";
   x.style.textAlign = "center";
 }
 
 function ShowError(errorMessage, timeout = 3000) {
   ShowMessage(errorMessage, "red");
 }
-
-//Functions for dealing with output
-function clearPrintResults() {
-  document.getElementById('output').innerHTML = "";
-}
-
-function printResults(message) {
-  document.getElementById('output').innerHTML += '<p>' + message + '</p>';
-};
 
 //Function gets called when "Copy To Clipbard" button is pushed
 //Function for reading values, generating terrain, outputing result
@@ -58,30 +49,40 @@ function CopyToClipboard() {
 //Function gets called when "Generate terrain" button is pushed
 //Function for reading values, generating terrain, outputing result
 function Generate() {
-  clearPrintResults();
+
+  elevation.generateElevation();
+  scaledElevation.generateElevation();
 
   slab = [];
 
-  const groundsliders = document.querySelectorAll("input[groundnguid]"); //all ground tile sliders
-  const sliderpercents = document.querySelectorAll("input[nguid]"); // all scatter sliders
+  const groundSliders = document.getElementById("groundsliders").childNodes; //all ground tile sliders
+  const scatterPercents = document.getElementById("randomsliders").childNodes; // all scatter sliders
 
-  var floorvalues = {};
+  var floorAssets = {};
+  var scatterAssets = {};
 
-  groundsliders.forEach(function(item) {
-    floorvalues[item.getAttribute("groundnguid")] = item.value; // for each ground tile add it's percentage
+  groundSliders.forEach(function(item) {
+    var nguid = item.getElementsByTagName("input")[0].getAttribute("nguid");
+    var percent = item.getElementsByTagName("span")[0].innerHTML;
+    floorAssets[nguid] = percent; // for each ground tile add it's percentage
   });
 
-  var terrain = GenerateTerrain(floorvalues); // generate terrain
+  scatterPercents.forEach(function(item) {
+    var nguid = item.getElementsByTagName("input")[0].getAttribute("nguid");
+    var asset = item.getElementsByTagName("input");
+    scatterAssets[nguid] = asset; // for each scatter tile add it's percentage
+  });
+
+console.log(floorAssets);
+  var terrain = GenerateTerrain(floorAssets); // generate terrain
 
   terrain.forEach(function(layer) {
       slab.push(layer);
   });
-
-  GenerateScatter(sliderpercents);
+  GenerateScatter(scatterAssets);
 
   var results = TalespireSlabs.CreateSlab(slab);
   document.getElementById("forest").value = results;
-  printResults(TalespireSlabs.DecodeSlab(results));
   ShowMessage("Complete", "green" , 2000);
 }
 
@@ -97,106 +98,126 @@ function ShowCustomAssets() {
 }
 
 //Function adds items to the "Randomness" section with sliders
-function AddAssetToList(nguid, defaultpercent, custom = false) {
-  var sliderdiv = document.createElement("div");
-
-  //sliderdiv.style.width = "100";
-
-
-/*
-<fieldset class="form-group">
-  <label for="Wslider">Width: </label>
-  <span id="W"></span>
-  <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Wslider" oninput="sliderUpdate(this, 'W')">
-</fieldset>
-
-
-<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"></button><label class="sliderheader" >' + asset['name'] + ':</label><span id="' + nguid + 'percent"></span><input type="range" min="0" max="100" nguid="' + nguid + '"  value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
-
-
-<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"></button><label class="sliderheader" >Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':</label><span id="' + nguid + 'percent"></span><input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
-
-
-<p class="sliderheader">
-  <button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn">
-    <i class="fa fa-close"></i>
-  </button>
-  Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':
-  <strong><span id="' + nguid + 'percent"></span>%</strong>
-  </p>
-  <input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider">';
-
-
-  '<p class="sliderheader">
-    <button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn">
-      <i class="fa fa-close"></i>
-    </button>
-    ' + asset['name'] + ':
-    <strong><span id="' + nguid + 'percent"></span>%</strong>
-    </p>
-    <input type="range" min="0" max="100" nguid="' + nguid + '" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider">';
-
-
-
-
-*/
-  if (custom) {
-    sliderdiv.innerHTML ='<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button><label class="sliderheader" >Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':  </label><span id="' + nguid + 'percent"></span>%<input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
-    document.getElementById("randomsliders").appendChild(sliderdiv);
-
-    var randslider = document.getElementById(nguid + "slider");
-
-    document.getElementById("randomsliders").appendChild(sliderdiv);
-    document.getElementById(nguid + "percent").innerHTML = randslider.value;
-
-    randslider.oninput = function() {
-      document.getElementById(nguid + "percent").innerHTML = this.value;
-    }
-  } else {
+function AddAssetToList(nguid, defaultpercent, custom = false){
+  if (!custom) {
     nguid = nguid.trim();
-
     var asset = TalespireSlabs.GetAsset(nguid);
-
-    sliderdiv.innerHTML ='<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button><label class="sliderheader" >' + asset['name'] + ':  </label><span id="' + nguid + 'percent"></span>%<input type="range" min="0" max="100" nguid="' + nguid + '"  value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
-    document.getElementById("randomsliders").appendChild(sliderdiv);
-
-    var randslider = document.getElementById(nguid + "slider");
-
-    document.getElementById("randomsliders").appendChild(sliderdiv);
-    document.getElementById(nguid + "percent").innerHTML = randslider.value;
-
-    randslider.oninput = function() {
-      document.getElementById(nguid + "percent").innerHTML = this.value;
-    }
   }
+
+  var field = document.createElement("fieldset");
+  field.setAttribute( 'class' , "form-group");
+
+  var button = document.createElement("button");
+  button.setAttribute( 'class' , "btn btn-danger mr-2");
+  button.setAttribute( 'id' , nguid + "removebtn");
+  button.setAttribute( 'onClick' ,"this.parentNode.parentNode.removeChild(this.parentNode);");
+
+  var icon = document.createElement("i");
+  icon.setAttribute( 'class' , "fa fa-close");
+
+  var label = document.createElement("label");
+  label.setAttribute( 'class' , "sliderheader");
+
+  if (custom) {
+    label.innerText = "Custom - " + nguid.substring(nguid.indexOf('-') + 1) + ": ";
+  } else{
+    label.innerText = asset['name'] + ": ";
+  }
+
+  var span = document.createElement("span");
+  span.setAttribute( 'id', nguid + "percent");
+
+  var input = document.createElement("input");
+  input.setAttribute( 'class' , "custom-range");
+  input.setAttribute( 'id' , nguid + "slider");
+  input.setAttribute( 'type' , "range");
+  input.setAttribute( 'min' , 0);
+  input.setAttribute( 'max' , 100);
+  input.setAttribute( 'value' , defaultpercent);
+  input.setAttribute( 'nguid' , nguid);
+  input.setAttribute( 'custom' , custom);
+
+  button.appendChild(icon);
+
+  field.appendChild(button);
+  field.appendChild(label);
+  field.appendChild(span);
+  field.appendChild(input);
+
+  document.getElementById("randomsliders").appendChild(field);
+
+  var slider = document.getElementById(nguid + "slider");
+
+  document.getElementById(nguid + "percent").innerHTML = slider.value ;
+
+  slider.oninput = function() {
+    document.getElementById(nguid + "percent").innerHTML =this.value ;
+  }
+
 }
 
 //Function adds items to the "Ground" section with sliders
-function AddAssetToGround(nguid, defaultpercent) {
-  nguid = nguid.trim();
+function AddAssetToGround(nguid, defaultpercent){
 
-  var sliderdiv = document.createElement("div");
+  custom = false;
+  nguid = nguid.trim();
   var asset = TalespireSlabs.GetAsset(nguid);
 
-  sliderdiv.innerHTML = '<p class="sliderheader"><button onClick="if (document.querySelectorAll(\'input[groundnguid]\').length > 1) {this.parentNode.parentNode.innerHTML=\'\';} else {ShowError(\'Must have at least 1 ground tile\');} " class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <span id="' + nguid + 'percent"></span>%</p><input type="range" min="1" max="100" groundnguid="' + nguid + '" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'groundslider">';
+  var field = document.createElement("fieldset");
+  field.setAttribute( 'class' , "form-group");
 
-  document.getElementById("groundsliders").appendChild(sliderdiv);
+  var button = document.createElement("button");
+  button.setAttribute( 'class' , "btn btn-danger mr-2");
+  button.setAttribute( 'id' , nguid + "removebtn");
+  button.setAttribute( 'onClick' , "if ( document.getElementById(\'groundsliders\').childElementCount > 1) {this.parentNode.parentNode.removeChild(this.parentNode);} else {ShowError(\'Must have at least 1 ground tile\');}");
 
-  var randslider = document.getElementById(nguid + "groundslider");
+  var icon = document.createElement("i");
+  icon.setAttribute( 'class' , "fa fa-close");
 
-  document.getElementById("groundsliders").appendChild(sliderdiv);
-  document.getElementById(nguid + "percent").innerHTML = randslider.value;
+  var label = document.createElement("label");
+  label.setAttribute( 'class' , "sliderheader");
 
-  randslider.oninput = function() {
+  label.innerText = asset['name'] + ": ";
+
+  var span = document.createElement("span");
+  span.setAttribute( 'id', nguid + "percent");
+
+  var input = document.createElement("input");
+  input.setAttribute( 'class' , "custom-range");
+  input.setAttribute( 'id' , nguid + "slider");
+  input.setAttribute( 'type' , "range");
+  input.setAttribute( 'min' , 0);
+  input.setAttribute( 'max' , 100);
+  input.setAttribute( 'value' , defaultpercent);
+  input.setAttribute( 'nguid' , nguid);
+
+  button.appendChild(icon);
+
+  field.appendChild(button);
+  field.appendChild(label);
+  field.appendChild(span);
+  field.appendChild(input);
+
+  document.getElementById("groundsliders").appendChild(field);
+
+  var slider = document.getElementById(nguid + "slider");
+
+  document.getElementById(nguid + "percent").innerHTML = slider.value;
+
+  slider.oninput = function() {
     document.getElementById(nguid + "percent").innerHTML = this.value;
   }
+
 }
+
 
 //Function populates the both lists
 function PopulateAssetList(assetList) {
   document.getElementById("groundsliders").innerHTML = "";
   document.getElementById("randomsliders").innerHTML = "";
+
   assetList['randoms'].forEach(function(prop_asset) {
+
     if (prop_asset['nguid'].startsWith('builtin')) {
       AddAssetToList(prop_asset['nguid'], prop_asset['defaultpercent'], true);
     } else {
@@ -240,13 +261,7 @@ function PopulateModalAssets() {
 
 //Function prints to output the list of blocks used in a slab
 function ReadSlab() {
-  clearPrintResults();
-  try {
-    printResults(TalespireSlabs.DecodeSlab(document.getElementById("forest").value));
-  } catch (err) {
-    console.log(err);
-    ShowError(err);
-  }
+  return;
 }
 
 //Function removes a custom asset from local save data
@@ -271,17 +286,7 @@ function SaveToLocal() {
     ShowError("You must give the slab a name.");
   }
 
-  clearPrintResults();
-
   var slabValue = document.getElementById("forest").value;
-
-  try {
-    printResults(TalespireSlabs.DecodeSlab(slabValue));
-  } catch (err) {
-    console.log(err);
-    ShowError(err);
-    return;
-  }
 
   window.localStorage.setItem('slab-' + customSlabName, slabValue);
 
@@ -324,7 +329,7 @@ function ShowAssetWindow(ground = false) {
   document.getElementById('AssetSelect').style.display = "block";
   if (ground) {
     document.getElementById("custom").checked = false;
-    SwapAssets();
+    //SwapAssets();
     document.getElementById('swapassets').style.display = "none";
   } else {
     document.getElementById('swapassets').style.display = "inline";
