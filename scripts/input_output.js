@@ -17,6 +17,9 @@ document.querySelector(".modal").addEventListener("click", function(e) {
 
 //Function for updating slider values, it takes the current element and ouput element id
 function sliderUpdate(element, output) {
+  elevation.generateElevation();
+  scaledElevation.generateElevation();
+  updateCanvas();
   var slider = document.getElementById(element.id);
   document.getElementById(output).innerHTML = slider.value;
 }
@@ -24,19 +27,10 @@ function sliderUpdate(element, output) {
 //Function for showing messages on screen
 function ShowMessage(message, color = "black", timeout = 3000) {
   var x = document.getElementById("snackbar");
-
   x.innerHTML = message;
   x.style.backgroundColor = color;
   x.className = "show";
-
-  var timeoutSeconds = ((timeout / 1000) - 0.5) + "s";
-
-  x.style.webkitAnimation = "fadein 0.5s, fadeout 0.5s " + timeoutSeconds;
-  x.style.animation = "fadein 0.5s, fadeout 0.5s " + timeoutSeconds;
-
-  setTimeout(function() {
-    x.className = x.className.replace("show", "");
-  }, timeout);
+  x.style.textAlign = "center";
 }
 
 function ShowError(errorMessage, timeout = 3000) {
@@ -106,10 +100,48 @@ function ShowCustomAssets() {
 function AddAssetToList(nguid, defaultpercent, custom = false) {
   var sliderdiv = document.createElement("div");
 
-  sliderdiv.style.width = "400px";
+  //sliderdiv.style.width = "100";
 
+
+/*
+<fieldset class="form-group">
+  <label for="Wslider">Width: </label>
+  <span id="W"></span>
+  <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Wslider" oninput="sliderUpdate(this, 'W')">
+</fieldset>
+
+
+<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"></button><label class="sliderheader" >' + asset['name'] + ':</label><span id="' + nguid + 'percent"></span><input type="range" min="0" max="100" nguid="' + nguid + '"  value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
+
+
+<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"></button><label class="sliderheader" >Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':</label><span id="' + nguid + 'percent"></span><input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
+
+
+<p class="sliderheader">
+  <button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn">
+    <i class="fa fa-close"></i>
+  </button>
+  Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':
+  <strong><span id="' + nguid + 'percent"></span>%</strong>
+  </p>
+  <input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider">';
+
+
+  '<p class="sliderheader">
+    <button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn">
+      <i class="fa fa-close"></i>
+    </button>
+    ' + asset['name'] + ':
+    <strong><span id="' + nguid + 'percent"></span>%</strong>
+    </p>
+    <input type="range" min="0" max="100" nguid="' + nguid + '" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider">';
+
+
+
+
+*/
   if (custom) {
-    sliderdiv.innerHTML = '<p class="sliderheader"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ': <strong><span id="' + nguid + 'percent"></span>%</strong> </p><input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="sliderwide" id="' + nguid + 'slider">';
+    sliderdiv.innerHTML ='<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button><label class="sliderheader" >Custom - ' + nguid.substring(nguid.indexOf('-') + 1) + ':  </label><span id="' + nguid + 'percent"></span>%<input type="range" min="0" max="100" nguid="' + nguid + '" custom="true" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
     document.getElementById("randomsliders").appendChild(sliderdiv);
 
     var randslider = document.getElementById(nguid + "slider");
@@ -125,8 +157,7 @@ function AddAssetToList(nguid, defaultpercent, custom = false) {
 
     var asset = TalespireSlabs.GetAsset(nguid);
 
-    sliderdiv.innerHTML =
-    '<p class="sliderheader"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <strong><span id="' + nguid + 'percent"></span>%</strong> </p><input type="range" min="0" max="100" nguid="' + nguid + '" value="' + defaultpercent + '" class="sliderwide" id="' + nguid + 'slider">';
+    sliderdiv.innerHTML ='<fieldset class="form-group"><button onClick="this.parentNode.parentNode.innerHTML=\'\';" class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button><label class="sliderheader" >' + asset['name'] + ':  </label><span id="' + nguid + 'percent"></span>%<input type="range" min="0" max="100" nguid="' + nguid + '"  value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'slider"></fieldset>';
     document.getElementById("randomsliders").appendChild(sliderdiv);
 
     var randslider = document.getElementById(nguid + "slider");
@@ -147,8 +178,7 @@ function AddAssetToGround(nguid, defaultpercent) {
   var sliderdiv = document.createElement("div");
   var asset = TalespireSlabs.GetAsset(nguid);
 
-  sliderdiv.style.width = "400px";
-  sliderdiv.innerHTML = '<p class="sliderheader"><button onClick="if (document.querySelectorAll(\'input[groundnguid]\').length > 1) {this.parentNode.parentNode.innerHTML=\'\';} else {ShowError(\'Must have at least 1 ground tile\');} " class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <strong><span id="' + nguid + 'percent"></span>%</strong> </p><input type="range" min="1" max="100" groundnguid="' + nguid + '" value="' + defaultpercent + '" class="sliderwide" id="' + nguid + 'groundslider">';
+  sliderdiv.innerHTML = '<p class="sliderheader"><button onClick="if (document.querySelectorAll(\'input[groundnguid]\').length > 1) {this.parentNode.parentNode.innerHTML=\'\';} else {ShowError(\'Must have at least 1 ground tile\');} " class="btn" id="' + nguid + 'removebtn"><i class="fa fa-close"></i></button> ' + asset['name'] + ': <span id="' + nguid + 'percent"></span>%</p><input type="range" min="1" max="100" groundnguid="' + nguid + '" value="' + defaultpercent + '" class="custom-range" id="' + nguid + 'groundslider">';
 
   document.getElementById("groundsliders").appendChild(sliderdiv);
 
