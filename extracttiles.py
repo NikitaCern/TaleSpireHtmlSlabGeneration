@@ -18,6 +18,7 @@ for root,d_names,f_names in os.walk(path):
             currentFile.readline()
             asset = json.loads(currentFile.read())
             nguid = asset["GUID"]
+            output[nguid] = asset
 with open("scripts/assetdata.js", "w") as fout:
     fout.write("asset_data = " + json.dumps(output) + ";")
 print("ALL Done!")
