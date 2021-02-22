@@ -1,199 +1,140 @@
-<html lang = "en">
+<html lang="en">
 
 <head>
   <title>Terrain Generator</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
   <link rel="stylesheet" href="styles/bootstrap.min.css">
   <link rel="stylesheet" href="styles/master.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 </head>
+
 <body>
-<div class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-      <h3>Terrain Generator
-        <small class="text-muted"> for Talespire</small>
-      </h3>
-      <div class="f-r">
-        <a href="https://github.com/NikitaCern/TaleSpireHtmlSlabGeneration">GitHub</a>
-        <i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i>
-      </div>
+      <h3>Terrain Generator<small class="text-muted"> for Talespire</small></h3>
+      <div class="f-r"><a href="https://github.com/NikitaCern/TaleSpireHtmlSlabGeneration">GitHub</a><i>See more great projects at <a href="https://talestavern.com/">TalesTavern</a></i></div>
     </div>
   </div>
   <div class="alert fade show" role="alert" id="snackbar"></div>
-<div class="row mr-5 ml-5">
+  <div class="row mr-5 ml-5">
+    <div id="SlabNameDialog"  class="modal" tabindex="-1" role="dialog" aria-labelledby="modal-name" aria-hidden="true">
 
-    <div id="SlabNameDialog" class="modal">
-      <div class="modal-content">
-        <div class="modal-body">
-        <p>Custom Slab Name</p>
-        <input type="text" id="slabname" placeholder="Enter Name">
-        <div class="btn-group">
-          <button onClick='document.getElementById("SlabNameDialog").style.display = "none";SaveToLocal();'><i class="fa fa-check"> OK</i></button>
-          <button onClick='document.getElementById("SlabNameDialog").style.display = "none";'><i class="fa fa-times"> Cancel</i></button>
-        </div>
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modal-name" class="modal-title">Asset Custom Asset</h3>
+            <button type="button" class="btn btn-success ml-auto mr-1" data-bs-dismiss="modal" onClick='SaveToLocal();' >OK</button>
+            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+          </div>
+          <div class="modal-body">
+            <input type="text" id="slabname" placeholder="Enter Name" class="form-control">
+          </div>
         </div>
       </div>
     </div>
 
 
-  <div class="row align-items-start w-100">
+    <div id="AssetSelect" class="modal" tabindex="-1" role="dialog" aria-labelledby="modal-name" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modal-name" class="modal-title">Asset Selection</h3>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="custom" onclick="ShowCustomAssets()">
+              <label class="form-check-label" for="custom" id="swapassets">
+                Show Custom Assets
+              </label>
+            </div>
+            <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+          </div>
+          <div class="modal-header"><input type="text" id="assetSearch" class="form-control"  onkeyup="searchAssets()" placeholder="Search"></div>
+          <div class="modal-body"><div id="assetTable" class="w-100"></div></div>
+        </div>
+      </div>
+    </div>
     <div class="col">
       <div class="card card-body">
-          <div class="form-group">
-            <form>
-              <fieldset>
-                <h2 class="card-header">Parameters:</h2>
-                <fieldset class="form-group">
-                  <label for="Wslider">Width: </label>
-                  <span id="W">5</span>
-                  <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Wslider" oninput="sliderUpdate(this, 'W')">
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="Dslider">Depth: </label>
-                  <span id="D">5</span>
-                  <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Dslider" oninput="sliderUpdate(this, 'D')">
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="Hslider">Height: </label>
-                  <span id="H">5</span>
-                  <input type="range" class="custom-range" min="1" max="50" value="5" step="1" id="Hslider" oninput="sliderUpdate(this, 'H')">
-                </fieldset>
-              </fieldset>
-              <fieldset>
-                <h2 class="card-header">Noise options:</h2>
-                <fieldset class="form-group">
-                  <label for="nsWslider">Noise W Scale: </label>
-                  <span id="nsW">5</span>
-                  <input type="range" class="custom-range" min="1" max="10" value="5" step="0.1" id="nsWslider" oninput="sliderUpdate(this, 'nsW')">
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="nsDslider">Noise D Scale: </label>
-                  <span id="nsD">5</span>
-                  <input type="range" class="custom-range" min="1" max="10" value="5" step="0.1" id="nsDslider" oninput="sliderUpdate(this, 'nsD')">
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="noWslider">Noise W Offset: </label>
-                  <span id="noW">0</span>
-                  <input type="range" class="custom-range" min="-50" max="50" value="0" step="1" id="noWslider" oninput="sliderUpdate(this, 'noW')">
-                </fieldset>
-                <fieldset class="form-group">
-                  <label for="noDslider">Noise D Offset: </label>
-                  <span id="noD">0</span>
-                  <input type="range" class="custom-range" min="-50" max="50" value="0" step="1" id="noDslider" oninput="sliderUpdate(this, 'noD')">
-                </fieldset>
+        <div class="form-group">
+          <form>
+            <fieldset>
+              <h2 class="card-header">Parameters:</h2>
+              <fieldset class="form-group"><label for="Wslider">Width: </label><span id="W">5</span><input type="range" class="custom-range" min="1" max="50" value="10" step="1" id="Wslider" oninput="sliderUpdate(this, 'W')"> </fieldset>
+              <fieldset class="form-group"><label for="Dslider">Depth: </label><span id="D">5</span><input type="range" class="custom-range" min="1" max="50" value="10" step="1" id="Dslider" oninput="sliderUpdate(this, 'D')"> </fieldset>
+              <fieldset class="form-group"><label for="Hslider">Height: </label><span id="H">5</span><input type="range" class="custom-range" min="1" max="10" value="3" step="1" id="Hslider" oninput="sliderUpdate(this, 'H')"> </fieldset>
+            </fieldset>
+            <fieldset>
+              <h2 class="card-header">Noise options:</h2>
+              <fieldset class="form-group"><label for="nsWslider">Noise W Scale: </label><span id="nsW">1</span><input type="range" class="custom-range" min="0.01" max="3" value="1" step="0.01" id="nsWslider" oninput="sliderUpdate(this, 'nsW')"></fieldset>
+              <fieldset class="form-group"><label for="nsDslider">Noise D Scale: </label><span id="nsD">1</span><input type="range" class="custom-range" min="0.01" max="3" value="1" step="0.01" id="nsDslider" oninput="sliderUpdate(this, 'nsD')"></fieldset>
+              <fieldset class="form-group"><label for="noWslider">Noise W Offset: </label><span id="noW">0</span><input type="range" class="custom-range" min="-50" max="50" value="0" step="1" id="noWslider" oninput="sliderUpdate(this, 'noW')"></fieldset>
+              <fieldset class="form-group"><label for="noDslider">Noise D Offset: </label><span id="noD">0</span><input type="range" class="custom-range" min="-50" max="50" value="0" step="1" id="noDslider" oninput="sliderUpdate(this, 'noD')"></fieldset>
+              <fieldset class="form-group"><label for="o1slider">Noise Octave 1: </label><span id="o1">0.5</span><input type="range" class="custom-range" min="0.01" max="1" value="0.5" step="0.01" id="o1slider" oninput="sliderUpdate(this, 'o1')"></fieldset>
+              <fieldset class="form-group"><label for="o2slider">Noise Octave 2: </label><span id="o2">0.5</span><input type="range" class="custom-range" min="0.01" max="1" value="0.5" step="0.01" id="o2slider" oninput="sliderUpdate(this, 'o2')"></fieldset>
+              <fieldset class="form-group"><label for="nEslider">Noise Exponent: </label><span id="nE">1</span><input type="range" class="custom-range" min="0.01" max="10" value="1" step="0.01" id="nEslider" oninput="sliderUpdate(this, 'nE')"></fieldset>
+              <fieldset class="form-group"><label for="Sslider">Seed: </label><span id="S">500</span><input type="range" class="custom-range" min="1" max="1000" value="500" step="1" id="Sslider" oninput="sliderUpdate(this, 'S')"></fieldset>
 
-                <fieldset class="form-group">
-                  <label for="Sslider">Seed: </label>
-                  <span id="S">500</span>
-                  <input type="range" class="custom-range" min="1" max="1000" value="500" step="1" id="Sslider" oninput="sliderUpdate(this, 'S')">
-                </fieldset>
-
-              </fieldset>
-            </form>
-            <div class="bs-components">
-              <button type="button" class="btn btn-success w-100" onclick="Generate();"> GenerateTerrain</button>
-            </div>
-          </div>
+            </fieldset>
+          </form>
+          <div class="bs-components"><button type="button" class="btn btn-success w-100" onclick="Generate();"> GenerateTerrain</button></div>
         </div>
+      </div>
     </div>
     <div class="col col-lg-6">
       <div class="card card-body">
-          <div class="form-group card-header">
-            <div class="row ">
-              <div class="col-auto mr-auto">
-                <h2 >Preset:</h2>
-              </div>
-              <div class="col">
-                <select class="form-control" id="presets" onchange="PopulateAssetList(presetAssets[this.value]);">
-                  <option value="mixed" selected="selected">Mixed Forest</option>
-                  <option value="sparsepine">Sparse Pine Forest</option>
-                  <option value="heavypine">Heavy Pine Forest</option>
-                  <option value="sparsedead">Sparse Dead Forest</option>
-                  <option value="heavydead">Heavy Dead Forest</option>
-                </select>
-              </div>
-            </div>
-
-
+        <div class="form-group card-header">
+          <div class="row ">
+            <div class="col-auto mr-auto"><h2>Preset:</h2></div>
+            <div class="col"> <select class="form-control" id="presets" onchange="PopulateAssetList(presetAssets[this.value]);">
+                <option value="mixed" selected="selected">Mixed Forest</option>
+                <option value="sparsepine">Sparse Pine Forest</option>
+                <option value="heavypine">Heavy Pine Forest</option>
+                <option value="sparsedead">Sparse Dead Forest</option>
+                <option value="heavydead">Heavy Dead Forest</option>
+              </select> </div>
           </div>
-          <div class="row align-items-start">
+        </div>
+
+        <div class="row align-items-start">
           <div class="col">
             <div class="form-group">
               <div class="row">
-                <div class="col-auto mr-auto">
-                  <h3>Ground</h3>
-                </div>
-                <div class="col-auto">
-                  <button onClick='ShowAssetWindow(true);' class="addbtn btn btn-success"><i class="fa fa-plus"></i> Add Ground</button>
-                </div>
+                <div class="col-auto mr-auto"><h3>Ground</h3></div>
+                <div class="col-auto"><button data-toggle="modal" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AssetSelect">Add Ground</button> </div>
               </div>
               <div id="groundsliders"></div>
             </div>
-            </div>
+          </div>
+
           <div class="col">
             <div class="row">
-              <div class="col-auto mr-auto">
-                  <h3 >Objects</h3>
-              </div>
-              <div class="col-auto">
-                <button onClick='ShowAssetWindow(false);' class="addbtn btn btn-success"><i class="fa fa-plus"></i> Add Asset</button>
-              </div>
+              <div class="col-auto mr-auto"><h3>Objects</h3></div>
+              <div class="col-auto"><button data-toggle="modal" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AssetSelect">Add Asset</button> </div>
             </div>
             <div id="randomsliders"></div>
-            <div id="AssetSelect" class="modal">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <div onclick='AssetSelect.style.display = "none";' class="modalClose"><i class="fa fa-close"></i></div>
-
-                  <h3 >Asset Selection</h3>
-
-                  <input type="text" id="assetSearch" onkeyup="searchAssets()" placeholder="&#xf002; Search">
-                  <label id="swapassets">
-                    <input onclick="ShowCustomAssets()" type="checkbox" id="custom">
-                    <span>Show Custom Assets</span>
-                  </label>
-
-                  <div id="assetTable"></div>
-
-                  <div onclick='AssetSelect.style.display = "none";' class="modalOk"><i class="fa fa-check-square"></i> Done</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+
       </div>
     </div>
-    <div class="col">
-      <div class="card card-body" id="canvasContainer">
-          <canvas id="canvas" class="w-auto" width=300 height=300></canvas>
-          <div class="btn-group w-100 mt-4">
-            <button type="button" class="btn btn-success" onclick="CopyToClipboard();">Copy To Clipboard</button>
-            <button type="button" class="btn btn-warning" onclick="ShowSaveDialog();">Save Custom Slab</button>
-            <button type="button" class="btn btn-warning"  onclick='ReadSlab();'>Read Pasted Slab</button>
-          </div>
-          <textarea id="forest" class="form-control textarea-autosize"></textarea>
 
+    <div class="col">
+      <div class="card card-body" id="canvasContainer"><canvas id="canvas" class="w-auto" width=300 height=300></canvas>
+        <div class="btn-group w-100 mt-4"><button type="button" class="btn btn-success" onclick="CopyToClipboard();">Copy To Clipboard</button><button data-toggle="modal" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#SlabNameDialog">Save Custom Slab</button><button
+            type="button" class="btn btn-warning" onclick='ReadSlab();'>Read Pasted Slab</button></div><textarea id="forest" class="form-control textarea-autosize"></textarea>
       </div>
     </div>
   </div>
-</div>
+  </div>
   <script src="presets/customs.js"></script>
   <script src="presets/presets.js"></script>
-
   <script src="scripts/talespireslabs.js"></script>
   <script src="scripts/assetdata.js"></script>
   <script src="scripts/input_output.js"></script>
   <script src="scripts/generation.js"></script>
-
   <script src="scripts/master.js"></script>
-
-
-
-
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
 </body>
 
 </html>

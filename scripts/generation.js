@@ -39,13 +39,13 @@ function GenerateTerrain(floorAssets){
       var selectedFloorGuid = GetWeightedValue(floorAssets);
       var selectedFloor = TalespireSlabs.GetAsset(selectedFloorGuid);
 
-      var centerHeight = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["y"];
-      var centerWidth = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["x"];
-      var centerDepth = selectedFloor["Info"]["colliderBounds"][0]["m_Center"]["z"];
+      var centerHeight = selectedFloor["colliderBounds"][0]["m_Center"]["y"];
+      var centerWidth = selectedFloor["colliderBounds"][0]["m_Center"]["x"];
+      var centerDepth = selectedFloor["colliderBounds"][0]["m_Center"]["z"];
 
-      var extentHeight =  selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["y"];
-      var extentWidth = selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["x"];
-      var extentDepth = selectedFloor["Info"]["colliderBounds"][0]["m_Extent"]["z"];
+      var extentHeight =  selectedFloor["colliderBounds"][0]["m_Extent"]["y"];
+      var extentWidth = selectedFloor["colliderBounds"][0]["m_Extent"]["x"];
+      var extentDepth = selectedFloor["colliderBounds"][0]["m_Extent"]["z"];
 
       var rotation = Math.floor(getRandom()*3)*4;
 
@@ -147,13 +147,13 @@ function AddAsset(nguid, percentage) {
 
   console.log(asset);
 
-  var centerHeight = asset["Info"]["colliderBounds"][0]["m_Center"]["y"];
-  var centerWidth = asset["Info"]["colliderBounds"][0]["m_Center"]["x"];
-  var centerDepth = asset["Info"]["colliderBounds"][0]["m_Center"]["z"];
+  var centerHeight = asset["colliderBounds"][0]["m_Center"]["y"];
+  var centerWidth = asset["colliderBounds"][0]["m_Center"]["x"];
+  var centerDepth = asset["colliderBounds"][0]["m_Center"]["z"];
 
-  var extentHeight =  asset["Info"]["colliderBounds"][0]["m_Extent"]["y"];
-  var extentWidth = asset["Info"]["colliderBounds"][0]["m_Extent"]["x"];
-  var extentDepth = asset["Info"]["colliderBounds"][0]["m_Extent"]["z"];
+  var extentHeight =  asset["colliderBounds"][0]["m_Extent"]["y"];
+  var extentWidth = asset["colliderBounds"][0]["m_Extent"]["x"];
+  var extentDepth = asset["colliderBounds"][0]["m_Extent"]["z"];
 
 
   var scalingFactorW = groundTileWidth/(extentWidth*2.0);

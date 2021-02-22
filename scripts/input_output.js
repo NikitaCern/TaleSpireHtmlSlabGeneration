@@ -49,10 +49,10 @@ function CopyToClipboard() {
 //Function gets called when "Generate terrain" button is pushed
 //Function for reading values, generating terrain, outputing result
 function Generate() {
-
   elevation.generateElevation();
   scaledElevation.generateElevation();
 
+  updateCanvas();
   slab = [];
 
   const groundSliders = document.getElementById("groundsliders").childNodes; //all ground tile sliders
@@ -73,7 +73,6 @@ function Generate() {
     scatterAssets[nguid] = asset; // for each scatter tile add it's percentage
   });
 
-console.log(floorAssets);
   var terrain = GenerateTerrain(floorAssets); // generate terrain
 
   terrain.forEach(function(layer) {
@@ -97,8 +96,26 @@ function ShowCustomAssets() {
   }
 }
 
-//Function adds items to the "Randomness" section with sliders
-function AddAssetToList(nguid, defaultpercent, custom = false){
+function AddToList(nguid, defaultpercent, ground = false, custom = false){
+
+  var groundRemoveOnClick = "if ( document.getElementById(\'groundsliders\').childElementCount > 1) {this.parentNode.parentNode.removeChild(this.parentNode);} else {ShowError(\'Must have at least 1 ground tile\');}";
+  var scatterRemoveOnClick = "this.parentNode.parentNode.removeChild(this.parentNode);";
+
+  var groundSliderId = "groundsliders";
+  var scatterSliderId = "randomsliders";
+
+  var removeOnClick = "";
+  var sliderId="";
+
+  if(ground){
+    removeOnClick = groundRemoveOnClick;
+    sliderId = groundSliderId;
+  }
+  else{
+    removeOnClick = scatterRemoveOnClick;
+    sliderId = scatterSliderId;
+  }
+
   if (!custom) {
     nguid = nguid.trim();
     var asset = TalespireSlabs.GetAsset(nguid);
@@ -110,7 +127,7 @@ function AddAssetToList(nguid, defaultpercent, custom = false){
   var button = document.createElement("button");
   button.setAttribute( 'class' , "btn btn-danger mr-2");
   button.setAttribute( 'id' , nguid + "removebtn");
-  button.setAttribute( 'onClick' ,"this.parentNode.parentNode.removeChild(this.parentNode);");
+  button.setAttribute( 'onClick' , removeOnClick);
 
   var icon = document.createElement("i");
   icon.setAttribute( 'class' , "fa fa-close");
@@ -118,10 +135,11 @@ function AddAssetToList(nguid, defaultpercent, custom = false){
   var label = document.createElement("label");
   label.setAttribute( 'class' , "sliderheader");
 
-  if (custom) {
+  if (custom){
     label.innerText = "Custom - " + nguid.substring(nguid.indexOf('-') + 1) + ": ";
-  } else{
-    label.innerText = asset['name'] + ": ";
+  }
+  else {
+    label.innerText = asset['boardAssetName'] + ": ";
   }
 
   var span = document.createElement("span");
@@ -138,76 +156,32 @@ function AddAssetToList(nguid, defaultpercent, custom = false){
   input.setAttribute( 'custom' , custom);
 
   button.appendChild(icon);
-
   field.appendChild(button);
   field.appendChild(label);
   field.appendChild(span);
   field.appendChild(input);
 
-  document.getElementById("randomsliders").appendChild(field);
-
-  var slider = document.getElementById(nguid + "slider");
-
-  document.getElementById(nguid + "percent").innerHTML = slider.value ;
-
-  slider.oninput = function() {
-    document.getElementById(nguid + "percent").innerHTML =this.value ;
-  }
-
-}
-
-//Function adds items to the "Ground" section with sliders
-function AddAssetToGround(nguid, defaultpercent){
-
-  custom = false;
-  nguid = nguid.trim();
-  var asset = TalespireSlabs.GetAsset(nguid);
-
-  var field = document.createElement("fieldset");
-  field.setAttribute( 'class' , "form-group");
-
-  var button = document.createElement("button");
-  button.setAttribute( 'class' , "btn btn-danger mr-2");
-  button.setAttribute( 'id' , nguid + "removebtn");
-  button.setAttribute( 'onClick' , "if ( document.getElementById(\'groundsliders\').childElementCount > 1) {this.parentNode.parentNode.removeChild(this.parentNode);} else {ShowError(\'Must have at least 1 ground tile\');}");
-
-  var icon = document.createElement("i");
-  icon.setAttribute( 'class' , "fa fa-close");
-
-  var label = document.createElement("label");
-  label.setAttribute( 'class' , "sliderheader");
-
-  label.innerText = asset['name'] + ": ";
-
-  var span = document.createElement("span");
-  span.setAttribute( 'id', nguid + "percent");
-
-  var input = document.createElement("input");
-  input.setAttribute( 'class' , "custom-range");
-  input.setAttribute( 'id' , nguid + "slider");
-  input.setAttribute( 'type' , "range");
-  input.setAttribute( 'min' , 0);
-  input.setAttribute( 'max' , 100);
-  input.setAttribute( 'value' , defaultpercent);
-  input.setAttribute( 'nguid' , nguid);
-
-  button.appendChild(icon);
-
-  field.appendChild(button);
-  field.appendChild(label);
-  field.appendChild(span);
-  field.appendChild(input);
-
-  document.getElementById("groundsliders").appendChild(field);
-
+  document.getElementById(sliderId).appendChild(field);
   var slider = document.getElementById(nguid + "slider");
 
   document.getElementById(nguid + "percent").innerHTML = slider.value;
 
   slider.oninput = function() {
-    document.getElementById(nguid + "percent").innerHTML = this.value;
+    document.getElementById(nguid + "percent").innerHTML = this.value ;
   }
 
+}
+
+
+//Function adds items to the "Randomness" section with sliders
+function AddAssetToList(nguid, defaultpercent, custom = false){
+  AddToList(nguid, defaultpercent, false, custom);
+
+}
+
+//Function adds items to the "Ground" section with sliders
+function AddAssetToGround(nguid, defaultpercent){
+  AddToList(nguid, defaultpercent, true, false);
 }
 
 
@@ -217,7 +191,6 @@ function PopulateAssetList(assetList) {
   document.getElementById("randomsliders").innerHTML = "";
 
   assetList['randoms'].forEach(function(prop_asset) {
-
     if (prop_asset['nguid'].startsWith('builtin')) {
       AddAssetToList(prop_asset['nguid'], prop_asset['defaultpercent'], true);
     } else {
@@ -232,19 +205,28 @@ function PopulateAssetList(assetList) {
 //Function populates the list of local assets
 function PopulateModalAssets() {
   var tmpTable =
-    '<span id="standardassets" style="display: block;"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table  width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
+    '<div id="standardassets" class="table-responsive"><table class="table table-hover" if="assetTable">';
   var assets = TalespireSlabs.GetAllAssets();
 
-  tmpTable += '<tr><th>Name</th><th>Size</th><th>GUID</th><th></th></tr>';
+  tmpTable += '<tr><th scope="col">Name</th><th scope="col">Size</th><th scope="col">GUID</th><th scope="col"></th></tr>';
 
   Object.entries(assets).forEach(function(asset) {
-    tmpTable += '<tr><td>' + asset[1]["name"] + '</td><td><strong>' + asset[1]["Info"]["colliderBounds"][0]["m_Extent"]["x"]*2.0 +"x"+ asset[1]["Info"]["colliderBounds"][0]["m_Extent"]["z"]*2.0  + '</strong></td><td>' + asset[0] + '</td><td><button onClick="if (assetWindowGround) {AddAssetToGround(\'' + asset[0] + '\', 10); } else {AddAssetToList(\'' + asset[0] +
+
+    var name = asset[1]["boardAssetName"];
+
+    var sizeX = (asset[1]["colliderBounds"][0]["m_Extent"]["x"]*2.0).toFixed(1);
+    var sizeY = (asset[1]["colliderBounds"][0]["m_Extent"]["z"]*2.0).toFixed(1);
+    var size =  sizeX+"x"+ sizeY;
+
+    var guid = asset[0];
+
+    tmpTable += '<tr><td>' + name + '</td><td><strong>' + size + '</strong></td><td>' + guid + '</td><td><button class="btn btn-success" onClick="if (assetWindowGround) {AddAssetToGround(\'' + guid + '\', 10); } else {AddAssetToList(\'' + guid +
       '\', 10);}" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
   });
-  tmpTable += "</table></div></td></tr></table></span>";
+  tmpTable += "</table></div>";
 
   tmpTable +=
-    '<span id="customassets" style="display: none"><table class="assetTable" style="margin-top: 20px; width: 810px" cellspacing="0" cellpadding="0" border="0"><tr></tr><tr><td style=" border: 1px solid #AAA" colspan="3"><div style="height: 400px; width: 810px; overflow-y:none; overflow-y:auto;"><table class="assetTable" width="790px" align="left" id="assetTable" cellspacing="0" cellpadding="0" border="1">';
+    '<div id="customassets" style="display: none"><table class="table table-hover table-striped" id="assetTable">';
 
   tmpTable += '<tr><th>Name</th><th></th><th></th></tr>';
 
@@ -252,10 +234,10 @@ function PopulateModalAssets() {
     // console.log(storeVal);
     if (storeVal[0].startsWith('slab-')) {
       tmpTable += '<tr><td>' + storeVal[0].substring(storeVal[0].indexOf('-') + 1) + '</td><td><button onClick="RemoveFromLocal(\'' + storeVal[0] +
-        '\');" class="addbtn"><i class="fa fa-trash"> Delete</i></button></td><td><button onClick="AddAssetToList(\'' + storeVal[0] + '\', 10, true);" class="addbtn"><i class="fa fa-plus"> Select</i></button></td></tr>';
+        '\');" class="addbtn btn btn-danger"><i class="fa fa-trash"> Delete</i></button></td><td><button onClick="AddAssetToList(\'' + storeVal[0] + '\', 10, true);" class="addbtn btn btn-success"><i class="fa fa-plus"> Select</i></button></td></tr>';
     }
   });
-  tmpTable += "</table></div></td></tr></table></span>";
+  tmpTable += "</table></div>";
   document.getElementById("assetTable").innerHTML = tmpTable;
 }
 
@@ -293,12 +275,6 @@ function SaveToLocal() {
   PopulateModalAssets();
   SwapAssets();
   ShowMessage("Saved Slab as: " + customSlabName + " <br>To delete or select use the \"Add Asset\" window.", "green", 6000);
-}
-
-//Function for displaying slab saving dialog
-function ShowSaveDialog() {
-  document.getElementById('slabname').value = "";
-  document.getElementById('SlabNameDialog').style.display = "block";
 }
 
 //Function for searching assets
